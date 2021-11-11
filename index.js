@@ -31,13 +31,13 @@ app.use('/user', userRouter);
 app.get('/memo', (req, res) => {
     console.log("get: memo")
     // return res.status(200).json({'aewrae': 'asdfasd'})
-    Ydoc.findById('618bd475a9063a78881ad248')
-    .exec((error, data) => {
-        if (error) return res.status(400).json({error})
-        if (data) {
-            res.status(200).json({ data })
-        }
-    })
+    // Ydoc.findById('618bd475a9063a78881ad248')
+    // .exec((error, data) => {
+    //     if (error) return res.status(400).json({error})
+    //     if (data) {
+    //         res.status(200).json({ data })
+    //     }
+    // })
 })
 
 app.listen(PORT, () => {
