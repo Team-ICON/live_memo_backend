@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const pushSchema = new mongoose.Schema({
     fromUser: String,
-    pushContent: String,
+    content: String,
     pushTime: { type: Date, default: Date.now() }
 })
 

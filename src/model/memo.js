@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const memoSchema = new mongoose.Schema({
-    memoContent: String, //일단 Buffer --> 추후 실험 후 결정
+    content: String, //일단 Buffer --> 추후 실험 후 결정
     createTime: { type: Date , default: Date.now() },
     updateTime: { type: Date, default: Date.now() },
     userList: [
-        // { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
-        { type: String }
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
     ],
     userCnt: Number,
 })
