@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
 
 const memoSchema = new mongoose.Schema({
-    yDoc: mongoose.Schema.Types.Decimal128,
+    memoContent: String, //일단 Buffer --> 추후 실험 후 결정
     createTime: { type: Date , default: Date.now() },
     updateTime: { type: Date, default: Date.now() },
-    users: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
+    userList: [
+        // { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
+        { type: String }
     ],
-    userCnt: Number
+    userCnt: Number,
 })
 
 const model = mongoose.model('Memo', memoSchema);

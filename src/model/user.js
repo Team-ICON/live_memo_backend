@@ -1,15 +1,11 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    email: String,
-    userID: String,
+    email: { type: String, required: true},
     profileName: String,
-    memoList: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Memo'}
-    ],
-    groups: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Group'}
-    ]
+    pushList: [{type: mongoose.Schema.Types.ObjectId, ref: "Push"}],
+    folderList: Map, // {key: String, val: list[ ObjetID ]}
+    memoList: Map // {key: ObjectID, val: String}
     
 })
 
