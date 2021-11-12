@@ -2,6 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import Ydoc from "./src/model/memo";
 import cors from "cors";
+var bodyParser = require('body-parser');
+
+/* Routers */
+import memoRouter from "./src/Router/memoRouter";
 
 import memoRouter from "./src/Router/memoRouter";
 
@@ -9,7 +13,12 @@ dotenv.config();
 import "./src/db";
 
 const app = express();
-const PORT = process.env.PORT || 1234;
+const PORT = process.env.PORT || 33333;
+
+/* 미들웨어 */
+app.use(cors())
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 /* 메모 생성
     메모 수정
