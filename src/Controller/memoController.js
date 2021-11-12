@@ -51,12 +51,31 @@ export const createMemo = async (req, res) => {
 
 }
 
-export const updateMemo = (req, res) => { //업데이트
+export const showMemo = (req, res) => { //메모 조회
 
 }
 
+export const saveMemo = (req, res) => {
+    // 1. memo id, content 받아오기
+    // const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
+    // const { memoId } = req.body;    // test용
+    const memoId = "ea15d81c-1101-4d15-beb1-9fe6cf592439";
+    const content = "aaaaaaaaaaa";
+
+    // 2. db에서 해당 메모 찾기
+    Memo.findOneAndUpdate({ID : memoId}, {updateTime: Date.now(), content : content}, (err, modified) => {
+        if (err) throw err;
+        return res.status(200).json({ "message": "memo saved successfully" });
+    });
+}
+
 export const deleteMemo = (req, res) => {
+
     // userid, memoid 가져오기 
+    // const { userId } = req.body; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
+    // const { memoId } = req.body;
+
+    // test용 유저 그냥 해봄
     const userId = "TEST";
     const memoId = "58c76de0-6313-4f55-ab76-edd96eeb542a";
 
@@ -102,8 +121,8 @@ export const deleteMemo = (req, res) => {
             let userList = memo.userList;
     
             userList = userList.filter(item => item !== userId);
-            // console.log(targetUser);
-            // 2) 유저리스트 길이가 0이 되면 진짜로 지우기
+
+            // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
             if (userList.length === 0) {
                 Memo.deleteOne({ID : memoId}, (err, res) => {
                     if (err) {
@@ -121,12 +140,5 @@ export const deleteMemo = (req, res) => {
 
 
     return res.status(200).json({ "message": "memo deleted successfully" });
-
-
-    // 3. 해당 memo 데이터의 useList에서 해당 userid를 제거
-    // 1) uerlist의 length가 0이명 몽구스 내에서 해당 메모 완전 삭제
 }
 
-export const saveMemo = (req, res) => {
-    
-}

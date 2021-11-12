@@ -3,13 +3,13 @@ import express from "express";
 import { createMemo,
     deleteMemo,
     saveMemo,
-    updateMemo } from "../Controller/memoController";
+    showMemo } from "../Controller/memoController";
 
 const router = express.Router();
 
-router.post("/add", createMemo);
-router.post("/update", updateMemo);
+router.get("/show", showMemo);
+router.post("/create", createMemo);
 router.post("/delete", deleteMemo);
-router.post("/export", saveMemo);
+router.post("/save", saveMemo);
 
 export default router;
