@@ -4,8 +4,9 @@ import Memo from "../model/memo";
 
 export const createMemo = async(req, res) => {
     // const {userid} = req.body;
-    // console.log("userid: " + userid);
-    Memo.create({ listofList : [["a", "b"], ["c", "d"]] }, (err, memo) => {
+    
+    const myMemo = new Map();
+    Memo.create(myMemo, (err, memo) => {
         if (err) {
             console.log("err at createMemo");
             console.error(err);
