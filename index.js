@@ -7,8 +7,6 @@ var bodyParser = require('body-parser');
 /* Routers */
 import memoRouter from "./src/Router/memoRouter";
 
-import memoRouter from "./src/Router/memoRouter";
-
 dotenv.config();
 import "./src/db";
 

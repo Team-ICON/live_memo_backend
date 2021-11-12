@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    ID : String,
     email: { type: String, required: true},
     profileName: String,
     pushList: [{type: mongoose.Schema.Types.ObjectId, ref: "Push"}],

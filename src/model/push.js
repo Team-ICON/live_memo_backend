@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const pushSchema = new mongoose.Schema({
+    ID : String,
     fromUser: [
         { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
     ],

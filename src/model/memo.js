@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 
 const memoSchema = new mongoose.Schema({
+    ID : String,
     content : String,
     createTime: { type: Date , default: Date.now() },
     updateTime: { type: Date, default: Date.now() },
-    userList: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
-    ],
-    userCnt: Number,
+    userList: [ String ],
 })
 
 const model = mongoose.model('Memo', memoSchema);
