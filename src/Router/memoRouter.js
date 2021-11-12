@@ -7,7 +7,7 @@ import { createMemo,
 
 const router = express.Router();
 
-router.get("/add", createMemo);
+router.post("/add", createMemo);
 router.post("/update", updateMemo);
 router.delete("/delete", deleteMemo);
 router.get("/export", exportMemo);

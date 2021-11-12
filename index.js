@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import Ydoc from "./src/model/memo";
 import cors from "cors";
 
+import memoRouter from "./src/Router/memoRouter";
+
 dotenv.config();
 import "./src/db";
 
@@ -21,24 +23,28 @@ const PORT = process.env.PORT || 1234;
 */
 app.use(cors())
 
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.json());
+
 app.get('/', (req, res) => {
     res.send('Hello world');
 })
 
 app.use('/memo', memoRouter);
-app.use('/user', userRouter);
+// app.use('/user', userRouter);
 
-app.get('/memo', (req, res) => {
-    console.log("get: memo")
-    // return res.status(200).json({'aewrae': 'asdfasd'})
-    // Ydoc.findById('618bd475a9063a78881ad248')
-    // .exec((error, data) => {
-    //     if (error) return res.status(400).json({error})
-    //     if (data) {
-    //         res.status(200).json({ data })
-    //     }
-    // })
-})
+// app.get('/memo', (req, res) => {
+//     console.log("get: memo")
+//     // return res.status(200).json({'aewrae': 'asdfasd'})
+//     // Ydoc.findById('618bd475a9063a78881ad248')
+//     // .exec((error, data) => {
+//     //     if (error) return res.status(400).json({error})
+//     //     if (data) {
+//     //         res.status(200).json({ data })
+//     //     }
+//     // })
+// })
 
 app.listen(PORT, () => {
     console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);

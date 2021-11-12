@@ -2,15 +2,12 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
     email: String,
-    userID: String,
     profileName: String,
-    memoList: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Memo'}
-    ],
-    groups: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Group'}
+    memoList: Map,
+    folderList: Map, 
+    PushList: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Push'}
     ]
-    
 })
 
 const model = mongoose.model('User', userSchema);
