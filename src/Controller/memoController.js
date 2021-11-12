@@ -2,7 +2,7 @@ import Memo from "../model/memo";
 
 // async await        
 
-export const createMemo = async(req, res) => { //async 인자에 next는 안넣어도 되는건가
+export const createMemo = async(req, res) => {
     // const {userid} = req.body;
     // console.log("userid: " + userid);
     Memo.create({ listofList : [["a", "b"], ["c", "d"]] }, (err, memo) => {
