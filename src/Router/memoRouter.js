@@ -7,9 +7,9 @@ import { createMemo,
 
 const router = express.Router();
 
-router.get("/show", showMemo);
 router.post("/create", createMemo);
 router.post("/delete", deleteMemo);
 router.post("/save", saveMemo);
+router.get("/show", showMemo);
 
 export default router;

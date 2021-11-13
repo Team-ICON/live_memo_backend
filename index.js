@@ -6,6 +6,8 @@ var bodyParser = require('body-parser');
 
 /* Routers */
 import memoRouter from "./src/Router/memoRouter";
+import folderRouter from "./src/Router/folderRouter";
+
 
 dotenv.config();
 import "./src/db";
@@ -40,6 +42,7 @@ app.get('/', (req, res) => {
 
 app.use('/memo', memoRouter);
 // app.use('/user', userRouter);
+app.use('/folder', folderRouter);
 
 // app.get('/memo', (req, res) => {
 //     console.log("get: memo")
