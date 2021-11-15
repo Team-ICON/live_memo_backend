@@ -49,18 +49,22 @@ export const deleteFolder = (req, res) => { //메모 삭제
     const userid = "TEST";
     const folderName = "testFolder";
 
+    if (folderName === "BOOKMARK") {
+        return res.status(400).json({"message": "cannot delete BOOKMARK"});
+    }
+
     // 2. 해당 유저 데이터로부터 folderList 받아오기
     User.findOne({ID : userId}, async (err, user) => {
         if (err) {
             console.log(err);
-            return res.status(400).json({"message": "no such f"})
+            return res.status(400).json({"message": "no such ID"})
         }
         let folderList = user.folderList;
 
     // 삭제하려는 폴더명이 폴더리스트에 있는지 확인
         if (!folderList.has(folderName)) {
             console.log("cannot find folder");
-            return res.status(400).json({"message": "cannot find folder"})
+            return res.status(400).json({"message": "cannot find folder"});
     }
 
     // 해당 폴더리스트에서 지우려는 폴더명 찾기

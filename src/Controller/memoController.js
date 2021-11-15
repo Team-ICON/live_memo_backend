@@ -35,14 +35,27 @@ export const createMemo = async (req, res) => {
                 }
 
                 let memoList = user.memoList;
-                if (!memoList) { // memoList 없는 경우(undefined)
+                let folderList = user.folderList;
+
+                if (!memoList || !folderList) { // memoList 없는 경우(undefined)
                     memoList = new Map();
                 }
+
+                if (!folderList) { // folderList 없는 경우(undefined)
+                    folderList = new Map();
+                    folderList.set("DEFAULT", []);
+                    folderList.set("BOOKMARK", []);
+                }
+
                 memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
-                
+                folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
+
+                // const newFolderList = folderList.get("DEFAULT")
+                // newFolderList.push(memoId);
+
+
                 // User DB에 변경사항 다시 저장
-                await User.findOneAndUpdate({ID : userId}, {memoList: memoList})
-                // .exec(); // .exec() 써야하는건가??
+                await User.findOneAndUpdate({ID : userId}, {memoList: memoList, folderList: folderList})
 
                 return res.status(200).json({ "message": "memo created successfully" });
             });
@@ -77,34 +90,54 @@ export const deleteMemo = (req, res) => {
 
     // test용 유저 그냥 해봄
     const userId = "TEST";
-    const memoId = "58c76de0-6313-4f55-ab76-edd96eeb542a";
+    const memoId = "ad1356e2-f326-458a-b589-27b8ebadc8b8";
 
+    // const result = _deleteOneMemo(userId, memoId)
+    _deleteOneMemo(userId, memoId);
+    // console.log("#########", result);
+    // if (result.success) {
+    //     // 삭제 성공시 
+    //     return res.status(200).json({ "message" : result.message });
+    // }
+    // else {
+
+    //     return res.status(400).json({ "message" : result.message });
+    // } 
+    return res.status(200).json({ "message": "memo deleted successfully" });
+
+}
+
+
+function _deleteOneMemo(userId, memoId){
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터 
-
-    // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거 
     User.findOne({ID : userId}, async (err, user) => {
         if (err) {
             console.log(err);
-            return res.status(400).json({"message": "no such id"})
+            // return res.status(400).json({"message": "no such id"})
+            return {success: false, message : "no such id"}
         }
 
         //  1) folderlist map,  memolist map 가져오기
         let folderList = user.folderList;
         let memoList = user.memoList;
 
+        
         //  2) 삭제해야할 메모를 가지고 있는 폴더 찾기
         let targetFolder = memoList.get(memoId);
 
-        // 3) 찾은 폴더에서 메모 삭제하고 폴더 갱신하기
+        // 3) memolist map에 ("memoId") 있는지 확인하기
+        if (!targetFolder) {
+            console.log("no such memo");
+            // return res.status(400).json({"message": "no such memo"})
+            return {success: false, message : "no such memo"}
+        }
+
+        // 4) 찾은 폴더에서 메모 삭제하고 폴더 갱신하기
         const newTargetFolderList = folderList.get(targetFolder).filter(item => item !== memoId);
         folderList.set(targetFolder, newTargetFolderList);
 
-        // 4) memolist map에 ("memoId") 있는지 확인하기
-        if (!memoList.has(memoId)) {
-            console.log("no such memo");
-            return res.status(400).json({"message": "no such memo"})
-        }
+        
  
         // 5) 찾은 메모 delete 
         memoList.delete(memoId);
@@ -127,7 +160,9 @@ export const deleteMemo = (req, res) => {
                 Memo.deleteOne({ID : memoId}, (err, res) => {
                     if (err) {
                         console.log(err);
-                        return res.status(400).json({"message": "delete failed"})
+                        // return res.status(400).json({"message": "delete failed"})
+                        return {success: false, message : "delete failed"}
+
                     }
                 })
             }
@@ -137,8 +172,7 @@ export const deleteMemo = (req, res) => {
     
         })
     });
+    // return res.status(200).json({ "message": "memo deleted successfully" });
+    return {success: true, message : "delete successfully"}
 
-
-    return res.status(200).json({ "message": "memo deleted successfully" });
 }
-
