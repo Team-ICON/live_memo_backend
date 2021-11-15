@@ -41,8 +41,38 @@ export const createFolder = (req, res) => { //폴더 생성
     });
 }
 
-export const deleteFolder = (req, res) => { //메모 조회
+export const deleteFolder = (req, res) => { //메모 삭제
+    // 1. 리퀘스트로부터 유저ID, 삭제할 폴더명, 받아오기
+    // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
+    // const { FolderName } = req.body; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
+    // test용 유저 그냥 해봄
+    const userid = "TEST";
+    const folderName = "testFolder";
 
+    // 2. 해당 유저 데이터로부터 folderList 받아오기
+    User.findOne({ID : userId}, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "no such f"})
+        }
+        let folderList = user.folderList;
+
+    // 삭제하려는 폴더명이 폴더리스트에 있는지 확인
+        if (!folderList.has(folderName)) {
+            console.log("cannot find folder");
+            return res.status(400).json({"message": "cannot find folder"})
+    }
+
+    // 해당 폴더리스트에서 지우려는 폴더명 찾기
+    // 해당 폴더명의 메모 리스트 받아오기
+    // 메모리스트 순회하면서 deleteMemo() 실행
+    // folderList에서 해당 folder(key) 삭제
+    
+    // db에 업데이트 
+    // await User.findOneAndUpdate({ID : userId}, {folderList: folderList});
+    // return res.status(200).json({ "message": "deleted successfully" });
+
+    });
 }
 
 export const moveFolder = (req, res) => { //메모 이동
