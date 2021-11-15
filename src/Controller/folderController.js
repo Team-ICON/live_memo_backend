@@ -1,11 +1,21 @@
 import Memo from "../model/memo";
 import User from "../model/user";
-import mongoose from "mongoose";
-import { v4 } from 'uuid';
 
 
 export const showFolder = (req, res) => { //메모 조회
+    // let { userid } = req.body;
+    let userid = '618e50689f7b6b438695fc2c';
+    User.findOne({ ID: userId }, (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "err at showFolder"});
+        }
 
+        let folderList = user.folderList;
+        let folders = folderList.keys();
+
+        return res.status(200).json({ folders });
+    })
 }
 
 export const createFolder = (req, res) => { //폴더 생성
@@ -14,8 +24,9 @@ export const createFolder = (req, res) => { //폴더 생성
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { folderName } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "TEST";
-    const folderName = "testFolder";
+    console.log('createFolder');
+    const userId = "618e50689f7b6b438695fc2c";
+    const folderName = "Bookmark";
     
     // 2. 해당 유저 데이터에서 folderListy-(map) 받아오고 수정
 
