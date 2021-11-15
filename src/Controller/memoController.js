@@ -3,10 +3,9 @@ import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
-
 // async await        
 
-export const createMemo = async (req, res) => {
+export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
@@ -65,7 +64,40 @@ export const createMemo = async (req, res) => {
 }
 
 export const showMemo = (req, res) => { //메모 조회
+    // let { userId } = req.body;
+    let userId = '618e50689f7b6b438695fc2c';
+    User.findOne({ userId }, (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "err at showMemo" })
+        }
 
+        let memoList = user.memoList;
+        let memoIds = memoList.keys();
+
+        let bookmarkList = user.bookmarkList;
+
+        
+        /*
+        const ids =  [
+            '4ed3ede8844f0f351100000c',
+            '4ed3f117a844e0471100000d', 
+            '4ed3f18132f50c491100000e',
+        ];
+
+        Model.find().where('_id').in(ids).exec((err, records) => {});
+        */
+
+        Memo.find().where('ID').in(memoIds).exec((err, records) => {
+            if (err) {
+                console.log(err)
+                return res.status(400).json({"message": "err at showMemo"})
+            }
+            if (records) {
+                console.log(records)
+            }
+        })
+    })
 }
 
 export const saveMemo = (req, res) => {
