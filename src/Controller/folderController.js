@@ -14,8 +14,8 @@ export const createFolder = (req, res) => { //폴더 생성
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { folderName } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "TEST";
-    const folderName = "testFolder";
+    const userId = "SeoL";
+    const folderName = "seoFolder";
     
     // 2. 해당 유저 데이터에서 folderListy-(map) 받아오고 수정
 
@@ -46,8 +46,8 @@ export const deleteFolder = (req, res) => { //메모 삭제
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { FolderName } = req.body; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "TEST";
-    const folderName = "testFolder";
+    const userId = "SeoL";
+    const folderName = "seoFolder";
 
     // if (folderName === "BOOKMARK" || folderName ==="DEFAULT") {
     //     console.log(err)
@@ -83,7 +83,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
                 userList = (userList || []).filter(item => item !== userId);
     
                 // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
-                if (userList.length === 0) {
+                if ((userList || []).length === 0) {
                     Memo.deleteOne({ID : target}, (err, res) => {
                         if (err) {
                             console.log(err);
@@ -114,10 +114,10 @@ export const moveFolder = (req, res) => { //메모 이동
     // const { beforeFolderName } = req.body; // request로부터 beforeFolderName 받아옴(원래는 구글 토큰에서 추출)
     // const { afterFolderName } = req.body; // request로부터 afterFolderName 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "TEST";
-    const memoId = "e3a2b97b-7815-4acc-ae55-770aa3c31683";
+    const userId = "SeoL";
+    const memoId = "9c2f0bba-6dad-4023-92b7-e702634fe0fa";
     const beforeFolderName = "DEFAULT";
-    const afterFolderName = "testFolder";
+    const afterFolderName = "seoFolder";
 
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ID : userId}, async (err, user) => {

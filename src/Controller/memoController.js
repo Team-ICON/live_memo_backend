@@ -10,7 +10,7 @@ export const createMemo = async (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "TEST";
+    const userId = "SeoL";
 
     // 2. 빈 메모 생성해서 DB에 넣어주기
     const newMemo = {
@@ -37,7 +37,7 @@ export const createMemo = async (req, res) => {
                 let memoList = user.memoList;
                 let folderList = user.folderList;
 
-                if (!memoList || !folderList) { // memoList 없는 경우(undefined)
+                if (!memoList) { // memoList 없는 경우(undefined)
                     memoList = new Map();
                 }
 
@@ -72,8 +72,8 @@ export const saveMemo = (req, res) => {
     // 1. memo id, content 받아오기
     // const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
     // const { memoId } = req.body;    // test용
-    const memoId = "ea15d81c-1101-4d15-beb1-9fe6cf592439";
-    const content = "aaaaaaaaaaa";
+    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
+    const content = "please";
 
     // 2. db에서 해당 메모 찾기
     Memo.findOneAndUpdate({ID : memoId}, {updateTime: Date.now(), content : content}, (err, modified) => {
@@ -89,8 +89,8 @@ export const deleteMemo = (req, res) => {
     // const { memoId } = req.body;
 
     // test용 유저 그냥 해봄
-    const userId = "TEST";
-    const memoId = "bf92f16b-9d74-4d27-a954-924433e684e6";
+    const userId = "SeoL";
+    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
 
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터 
