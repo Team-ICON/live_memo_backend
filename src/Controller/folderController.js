@@ -47,7 +47,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
     // const { FolderName } = req.body; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
     const userId = "TEST";
-    const folderName = "DEFAULT";
+    const folderName = "testFolder";
 
     // if (folderName === "BOOKMARK" || folderName ==="DEFAULT") {
     //     console.log(err)
@@ -73,14 +73,36 @@ export const deleteFolder = (req, res) => { //메모 삭제
         let targetMemoList = folderList.get(folderName);
         // console.log(targetMemoList);
     // 메모리스트 순회하면서 deleteMemo() 실행
-        targetMemoList.forEach(deleteMemo);
+        targetMemoList.forEach(target => {
+            memoList.delete(target);
+            Memo.findOne({ID : target}, async (err, memo) => {
+    
+                // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
+                let userList = memo.userList;
+        
+                userList = (userList || []).filter(item => item !== userId);
+    
+                // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
+                if (userList.length === 0) {
+                    Memo.deleteOne({ID : target}, (err, res) => {
+                        if (err) {
+                            console.log(err);
+                            return res.status(400).json({"message": "delete failed"})
+                        }
+                    })
+                }
+                // 3) 변경사항  DB에 저장
+                await Memo.findOneAndUpdate({ID : target}, {userList: userList});
+        
+            })
+        })
 
-    // folderList에서 해당 folder(key) 삭제
+        // folderList에서 해당 folder 삭제
+        folderList.delete(folderName);
     
     // db에 업데이트 
-    // await User.findOneAndUpdate({ID : userId}, {folderList: folderList});
-    // return res.status(200).json({ "message": "deleted successfully" });
-
+    await User.findOneAndUpdate({ID : userId}, {folderList: folderList, memoList: memoList});
+    return res.status(200).json({ "message": "deleted successfully" });
     });
 }
 
@@ -93,9 +115,9 @@ export const moveFolder = (req, res) => { //메모 이동
     // const { afterFolderName } = req.body; // request로부터 afterFolderName 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
     const userId = "TEST";
-    const memoId = "ea15d81c-1101-4d15-beb1-9fe6cf592439";
-    const beforeFolderName = "testFolder";
-    const afterFolderName = "DEFAULT";
+    const memoId = "e3a2b97b-7815-4acc-ae55-770aa3c31683";
+    const beforeFolderName = "DEFAULT";
+    const afterFolderName = "testFolder";
 
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ID : userId}, async (err, user) => {
