@@ -47,29 +47,34 @@ export const deleteFolder = (req, res) => { //메모 삭제
     // const { FolderName } = req.body; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
     const userId = "TEST";
-    const folderName = "testFolder";
+    const folderName = "DEFAULT";
 
-    if (folderName === "BOOKMARK") {
-        return res.status(400).json({"message": "cannot delete BOOKMARK"});
-    }
+    // if (folderName === "BOOKMARK" || folderName ==="DEFAULT") {
+    //     console.log(err)
+    //     return res.status(400).json({"message": "cannot delete this folder"});
+    // }
 
-    // 2. 해당 유저 데이터로부터 folderList 받아오기
+    // 2. 해당 유저 데이터로부터 folderList, memolist 받아오기
     User.findOne({ID : userId}, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({"message": "no such ID"})
         }
         let folderList = user.folderList;
+        let memoList = user.memoList;
 
     // 삭제하려는 폴더명이 폴더리스트에 있는지 확인
         if (!folderList.has(folderName)) {
             console.log("cannot find folder");
             return res.status(400).json({"message": "cannot find folder"});
-    }
+        }
 
-    // 해당 폴더리스트에서 지우려는 폴더명 찾기
     // 해당 폴더명의 메모 리스트 받아오기
+        let targetMemoList = folderList.get(folderName);
+        // console.log(targetMemoList);
     // 메모리스트 순회하면서 deleteMemo() 실행
+        targetMemoList.forEach(deleteMemo);
+
     // folderList에서 해당 folder(key) 삭제
     
     // db에 업데이트 
