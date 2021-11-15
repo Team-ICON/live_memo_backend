@@ -90,54 +90,35 @@ export const deleteMemo = (req, res) => {
 
     // test용 유저 그냥 해봄
     const userId = "TEST";
-    const memoId = "ad1356e2-f326-458a-b589-27b8ebadc8b8";
+    const memoId = "bf92f16b-9d74-4d27-a954-924433e684e6";
 
-    // const result = _deleteOneMemo(userId, memoId)
-    _deleteOneMemo(userId, memoId);
-    // console.log("#########", result);
-    // if (result.success) {
-    //     // 삭제 성공시 
-    //     return res.status(200).json({ "message" : result.message });
-    // }
-    // else {
-
-    //     return res.status(400).json({ "message" : result.message });
-    // } 
-    return res.status(200).json({ "message": "memo deleted successfully" });
-
-}
-
-
-function _deleteOneMemo(userId, memoId){
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터 
+
+    // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거 
     User.findOne({ID : userId}, async (err, user) => {
         if (err) {
             console.log(err);
-            // return res.status(400).json({"message": "no such id"})
-            return {success: false, message : "no such id"}
+            return res.status(400).json({"message": "no such id"})
         }
 
         //  1) folderlist map,  memolist map 가져오기
         let folderList = user.folderList;
         let memoList = user.memoList;
 
-        
         //  2) 삭제해야할 메모를 가지고 있는 폴더 찾기
         let targetFolder = memoList.get(memoId);
 
         // 3) memolist map에 ("memoId") 있는지 확인하기
         if (!targetFolder) {
             console.log("no such memo");
-            // return res.status(400).json({"message": "no such memo"})
-            return {success: false, message : "no such memo"}
+            return res.status(400).json({"message": "no such memo"})
         }
 
         // 4) 찾은 폴더에서 메모 삭제하고 폴더 갱신하기
         const newTargetFolderList = folderList.get(targetFolder).filter(item => item !== memoId);
         folderList.set(targetFolder, newTargetFolderList);
 
-        
  
         // 5) 찾은 메모 delete 
         memoList.delete(memoId);
@@ -160,9 +141,7 @@ function _deleteOneMemo(userId, memoId){
                 Memo.deleteOne({ID : memoId}, (err, res) => {
                     if (err) {
                         console.log(err);
-                        // return res.status(400).json({"message": "delete failed"})
-                        return {success: false, message : "delete failed"}
-
+                        return res.status(400).json({"message": "delete failed"})
                     }
                 })
             }
@@ -171,8 +150,7 @@ function _deleteOneMemo(userId, memoId){
             await Memo.findOneAndUpdate({ID : memoId}, {userList: userList});
     
         })
-    });
-    // return res.status(200).json({ "message": "memo deleted successfully" });
-    return {success: true, message : "delete successfully"}
+        return res.status(200).json({ "message": "memo deleted successfully" });
+    })
 
 }

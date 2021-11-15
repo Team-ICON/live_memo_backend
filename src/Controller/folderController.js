@@ -46,7 +46,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { FolderName } = req.body; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userid = "TEST";
+    const userId = "TEST";
     const folderName = "testFolder";
 
     if (folderName === "BOOKMARK") {
