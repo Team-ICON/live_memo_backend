@@ -2,10 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import Ydoc from "./src/model/memo";
 import cors from "cors";
+import passport from 'passport';
+
 var bodyParser = require('body-parser');
 
 /* Routers */
 import memoRouter from "./src/Router/memoRouter";
+import userRouter from "./src/Router/userRouter";
 import folderRouter from "./src/Router/folderRouter";
 
 
@@ -20,42 +23,25 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-/* 메모 생성
-    메모 수정
-    메모 삭제
-    메조 저장
-    멤버 초대
-    멤버 검색
-    내보내기
-    회원가입
-    프로필
-*/
+
 app.use(cors())
-
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.json());
+
+// google authentication
+// const passport = require('passport');
+app.use(passport.initialize());
 
 app.get('/', (req, res) => {
     res.send('Hello world');
 })
 
+app.use('/user', userRouter);
+
 app.use('/memo', memoRouter);
-// app.use('/user', userRouter);
 app.use('/folder', folderRouter);
 
-// app.get('/memo', (req, res) => {
-//     console.log("get: memo")
-//     // return res.status(200).json({'aewrae': 'asdfasd'})
-//     // Ydoc.findById('618bd475a9063a78881ad248')
-//     // .exec((error, data) => {
-//     //     if (error) return res.status(400).json({error})
-//     //     if (data) {
-//     //         res.status(200).json({ data })
-//     //     }
-//     // })
-// })
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
     console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
 })

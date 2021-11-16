@@ -116,7 +116,6 @@ export const moveFolder = (req, res) => { //메모 이동
     // test용 유저 그냥 해봄
     const userId = "SeoL";
     const memoId = "9c2f0bba-6dad-4023-92b7-e702634fe0fa";
-    const beforeFolderName = "DEFAULT";
     const afterFolderName = "seoFolder";
 
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
@@ -128,6 +127,7 @@ export const moveFolder = (req, res) => { //메모 이동
         let folderList = user.folderList;
         let memoList = user.memoList;
 
+        const beforeFolderName = memoList.get(memoId);
         // 받아온 메모id가 있는지 확인 필요
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
         // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리

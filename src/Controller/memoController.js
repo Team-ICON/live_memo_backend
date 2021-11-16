@@ -18,6 +18,15 @@ export const createMemo = async (req, res) => {
         content: "",
         userList: [userId],
     }
+
+    //유저 생성 test용
+    // User.create({email: "seo@test.com"}, (err, user) => {
+    //     if(err) {
+    //         console.log(err);
+    //     }
+    //     console.log(user);
+    // })
+
     await Memo.create(newMemo, (err, newMemo) => {
         if (err) {
             console.log("err at createMemo");
