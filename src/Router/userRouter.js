@@ -3,7 +3,7 @@ import express from "express";
 // google authentication
 import passport from "passport";
 import "../Services/AuthService";
-import { signToken } from "../Services/AuthService";
+import { signToken, isLoggedin } from "../Services/AuthService";
 
 const router = express.Router();
 

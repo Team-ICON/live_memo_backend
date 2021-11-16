@@ -18,7 +18,6 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
         const email = profile.email;
         const profileName = profile.displayName;
-        console.log(profileName);
         // check if user already exists
         const currentUser = await User.findOne({ email: email });
         if (currentUser) {
@@ -32,7 +31,6 @@ passport.use(
     }
   )
 );
-
 
 
 // Issue Token

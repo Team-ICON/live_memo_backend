@@ -19,6 +19,5 @@ router.get("/show", showMemo);
 // router.post("/save", isLoggedin, saveMemo);
 // router.get("/show", isLoggedin, showMemo);
 
-// router.get("/show", isloggedin, showMemo);
 
 export default router;
