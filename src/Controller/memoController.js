@@ -3,6 +3,8 @@ import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
+import { moveFolderUtil } from "../utils2";
+
 // async await        
 
 export const createMemo = (req, res) => {
@@ -73,6 +75,7 @@ export const createMemo = (req, res) => {
 }
 
 export const showMemo = (req, res) => { //메모 조회
+    console.log('showMemo');
     // let { userId } = req.body;
     let userId = '618e50689f7b6b438695fc2c';
     User.findOne({ userId }, (err, user) => {
@@ -82,10 +85,24 @@ export const showMemo = (req, res) => { //메모 조회
         }
 
         let memoList = user.memoList;
-        let memoIds = memoList.keys();
+        // let memoIds = memoList.keys();
+        // console.log(`typeof(memoIds)`, typeof(memoIds));
 
-        let bookmarkList = user.bookmarkList;
+        let bookmarkList = user.folderList.get("BOOKMARK");
 
+        let arrangedList = [];
+        arrangedList.push(...bookmarkList);
+
+        memoList.forEach((value, key) => {
+            if (!arrangedList.includes(key)) {
+                arrangedList.push(key)
+            } 
+        });
+
+
+        console.log(`memoList`, memoList);
+        console.log(`bookmarkList`, bookmarkList);
+        console.log(`arrangedList`, arrangedList);
         
         /*
         const ids =  [
@@ -93,20 +110,34 @@ export const showMemo = (req, res) => { //메모 조회
             '4ed3f117a844e0471100000d', 
             '4ed3f18132f50c491100000e',
         ];
-
+        
         Model.find().where('_id').in(ids).exec((err, records) => {});
         */
 
-        Memo.find().where('ID').in(memoIds).exec((err, records) => {
-            if (err) {
-                console.log(err)
-                return res.status(400).json({"message": "err at showMemo"})
+       Memo.find().where('ID').in(arrangedList).exec((err, records) => {
+           if (err) {
+               console.log(err)
+               return res.status(400).json({"message": "err at showMemo"})
             }
             if (records) {
                 console.log(records)
+                return res.status(200).json({ "message": "오케이 계획대로 되고있어" });
             }
         })
     })
+}
+
+export const viewMemo = (req, res) => {
+    const { memoId } = req.body;
+    Memo.findOne({ID : memoId}, (err, result) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "err at viewMemo"});
+        }
+        if (result) {
+            return res.status(200).json({ result });
+        }
+    });   
 }
 
 export const saveMemo = (req, res) => {
@@ -118,7 +149,10 @@ export const saveMemo = (req, res) => {
 
     // 2. db에서 해당 메모 찾기
     Memo.findOneAndUpdate({ID : memoId}, {updateTime: Date.now(), content : content}, (err, modified) => {
-        if (err) throw err;
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "memo saved failed"});
+        }
         return res.status(200).json({ "message": "memo saved successfully" });
     });
 }
@@ -195,3 +229,77 @@ export const deleteMemo = (req, res) => {
     })
 
 }
+
+export const addBookmark = async(req, res) => {
+    const userId = "618e50689f7b6b438695fc2c";
+    const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
+    const afterFolderName = "BOOKMARK";
+    
+    try {
+        // moveFolderUtil(userId, memoId, afterFolderName, req, res);
+        let jojo = await moveFolderUtil(userId, memoId, afterFolderName);
+    
+        console.log(`jojo`, jojo);
+        jojo.then((err, siba) => {
+            console.log(`siba`, siba);
+        })
+    } catch (err) {
+        console.log(err)
+    }
+};
+
+export const removeBookmark = (req, res) => {
+    const userId = "618e50689f7b6b438695fc2c";
+    const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
+    const afterFolderName = "DEFAULT";
+    
+    // moveFolderUtil(userId, memoId, afterFolderName, req, res);
+    let momo = moveFolderUtil(userId, memoId, afterFolderName);
+    console.log(`momo`, momo);
+    momo.then((err, siba) => {
+        console.log(`siba`, siba);
+    })
+
+};
+
+export const checkBookmark = (req, res) => {
+    const userId = "618e50689f7b6b438695fc2c";
+    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
+
+    User.findOne({ID: userId}, async(err, user) => {
+        try {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({"message": "err at addbookmark"});
+            }
+    
+            let folderList = user.folderList;
+            console.log(`folderList`, folderList);
+            let bookmarkList = folderList.get("BOOKMARK");
+            console.log(`bookmarkList`, bookmarkList);
+            console.log(`bookmarkList.includes(memoId)`, bookmarkList.includes(memoId));
+            if (bookmarkList.includes(memoId)) {
+                // already bookmarked;
+                let bookmarkedIdx = bookmarkList.indexOf(memoId);
+                if (bookmarkedIdx > -1) {
+                    bookmarkList.splice(bookmarkedIdx, 1);
+                }
+                console.log(`folderList`, folderList);
+                console.log('bookmark removed');
+                await User.findOneAndUpdate({ID : userId}, {folderList: folderList});
+                return res.status(200).json({"message": "remove at addbookmark"});
+            } else {
+                // add check bookmarked;
+                bookmarkList.push(memoId);
+                console.log('bookmark added');
+                await User.findOneAndUpdate({ID : userId}, {folderList: folderList});
+                return res.status(200).json({"message": "add at addbookmark"});
+            }
+        } catch (err) {
+            console.log(err);
+            return res.status(400).json({"message": "something happened in checkBookmark"});
+        }
+    })
+}
+
+

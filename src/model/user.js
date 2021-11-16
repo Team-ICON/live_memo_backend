@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
 const userSchema = new mongoose.Schema({
+<<<<<<< HEAD
     ID : {
         type: String,
         default: v4(),
@@ -31,6 +32,15 @@ const userSchema = new mongoose.Schema({
         type: Map,
         default: {},
     } 
+=======
+    ID : String,
+    email: { type: String, required: true},
+    profileName: String,
+    pushList: [{type: mongoose.Schema.Types.ObjectId, ref: "Push"}],
+    folderList: Map, // {key: String, val: list[ ObjetID ]}
+    memoList: Map, // {key: ObjectID, val: String}
+    // bookmarkList: Map
+>>>>>>> jb
 })
 
 const model = mongoose.model('User', userSchema);

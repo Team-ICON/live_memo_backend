@@ -121,13 +121,12 @@ export const moveFolder = (req, res) => { //메모 이동
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { memoId } = req.body; // request로부터 memo id 받아옴(원래는 구글 토큰에서 추출)
-    // const { beforeFolderName } = req.body; // request로부터 beforeFolderName 받아옴(원래는 구글 토큰에서 추출)
     // const { afterFolderName } = req.body; // request로부터 afterFolderName 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
     const userId = "SeoL";
     const memoId = "9c2f0bba-6dad-4023-92b7-e702634fe0fa";
     const afterFolderName = "seoFolder";
-
+    
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ID : userId}, async (err, user) => {
         if (err) {
@@ -136,7 +135,11 @@ export const moveFolder = (req, res) => { //메모 이동
         }
         let folderList = user.folderList;
         let memoList = user.memoList;
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> jb
         const beforeFolderName = memoList.get(memoId);
         // 받아온 메모id가 있는지 확인 필요
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
