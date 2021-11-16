@@ -1,11 +1,21 @@
 import Memo from "../model/memo";
 import User from "../model/user";
-import mongoose from "mongoose";
-import { v4 } from 'uuid';
 
 
 export const showFolder = (req, res) => { //메모 조회
+    // let { userid } = req.body;
+    let userid = '618e50689f7b6b438695fc2c';
+    User.findOne({ ID: userId }, (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "err at showFolder"});
+        }
 
+        let folderList = user.folderList;
+        let folders = folderList.keys();
+
+        return res.status(200).json({ folders });
+    })
 }
 
 export const createFolder = (req, res) => { //폴더 생성

@@ -26,6 +26,7 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
+    console.log('hellooo')
     res.send('Hello world');
 })
 
