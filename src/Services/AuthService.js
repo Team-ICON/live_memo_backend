@@ -11,7 +11,7 @@ passport.use(
   new GoogleStrategy(
     {
       // options for strategy
-      callbackURL: `http://localhost:${process.env.PORT}/user/auth/google/callback/`,
+      callbackURL: `http://localhost:${process.env.PORT}/api/user/auth/google/callback/`,
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET
     },
@@ -35,11 +35,12 @@ passport.use(
 
 // Issue Token
 export const signToken = (req, res) => {
-    jwt.sign({email: req.user.email, profileName: req.user.profileName}, process.env.JWT_SECRET, {expiresIn:'1 day'}, (err, token) => {
+    console.log(`req.user`, req.user);
+    jwt.sign({email: req.user.email, profileName: req.user.profileName, ID: req.user.ID }, process.env.JWT_SECRET, {expiresIn:'1 day'}, (err, token) => {
         if(err){
             return res.sendStatus(500);
         } else {
-            return res.json({token});
+            return res.status(200).json({token});
         }
     });
 }

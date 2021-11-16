@@ -5,7 +5,7 @@ const pushSchema = new mongoose.Schema({
     fromUser: [
         { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
     ],
-    content : String,
+    body : String,
     pushTime: { type: Date, default: Date.now() },
 })
 

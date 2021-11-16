@@ -30,9 +30,9 @@ app.get('/', (req, res) => {
     res.send('Hello world');
 })
 
-app.use('/user', userRouter);
-app.use('/memo', memoRouter);
-app.use('/folder', folderRouter);
+app.use('/api/user', userRouter);
+app.use('/api/memo', memoRouter);
+app.use('/api/folder', folderRouter);
 
 
 app.listen(process.env.PORT, () => {

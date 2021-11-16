@@ -135,11 +135,6 @@ export const moveFolder = (req, res) => { //메모 이동
         }
         let folderList = user.folderList;
         let memoList = user.memoList;
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> jb
         const beforeFolderName = memoList.get(memoId);
         // 받아온 메모id가 있는지 확인 필요
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요

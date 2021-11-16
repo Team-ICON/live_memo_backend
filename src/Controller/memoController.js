@@ -16,6 +16,7 @@ export const createMemo = (req, res) => {
     // 2. 빈 메모 생성해서 DB에 넣어주기
     const newMemo = {
         ID : v4(),
+        // roomId: v4(),
         content: "",
         userList: [userId],
     }
@@ -28,7 +29,7 @@ export const createMemo = (req, res) => {
     //     console.log(user);
     // })
 
-    await Memo.create(newMemo, (err, newMemo) => {
+    Memo.create(newMemo, (err, newMemo) => {
         if (err) {
             console.log("err at createMemo");
             console.error(err);
@@ -63,22 +64,20 @@ export const createMemo = (req, res) => {
                 // const newFolderList = folderList.get("DEFAULT")
                 // newFolderList.push(memoId);
 
-
                 // User DB에 변경사항 다시 저장
                 await User.findOneAndUpdate({ID : userId}, {memoList: memoList, folderList: folderList})
 
-                return res.status(200).json({ "message": "memo created successfully" });
+                return res.status(200).json({ "message": "memo created successfully", data: newMemo });
             });
         }
     })
 
 }
 
-export const showMemo = (req, res) => { //메모 조회
-    console.log('showMemo');
-    // let { userId } = req.body;
-    let userId = '618e50689f7b6b438695fc2c';
-    User.findOne({ userId }, (err, user) => {
+export const showMemos = (req, res) => { //메모 조회
+
+    let user = req.user;
+    User.findOne({ ID: user.ID }, (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at showMemo" })
@@ -128,7 +127,7 @@ export const showMemo = (req, res) => { //메모 조회
 }
 
 export const viewMemo = (req, res) => {
-    const { memoId } = req.body;
+    let memoId = req.params.id;
     Memo.findOne({ID : memoId}, (err, result) => {
         if (err) {
             console.log(err);
@@ -145,10 +144,10 @@ export const saveMemo = (req, res) => {
     // const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
     // const { memoId } = req.body;    // test용
     const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
-    const content = "please";
+    const body = "please";
 
     // 2. db에서 해당 메모 찾기
-    Memo.findOneAndUpdate({ID : memoId}, {updateTime: Date.now(), content : content}, (err, modified) => {
+    Memo.findOneAndUpdate({ID : memoId}, {updateTime: Date.now(), body : body}, (err, modified) => {
         if (err) {
             console.log(err);
             return res.status(400).json({"message": "memo saved failed"});

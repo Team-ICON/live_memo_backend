@@ -3,7 +3,7 @@ import express from "express";
 import { createMemo,
     deleteMemo,
     saveMemo,
-    showMemo,
+    showMemos,
     addBookmark,
     removeBookmark,
     viewMemo,
@@ -14,14 +14,14 @@ import { isLoggedin } from "../Services/AuthService";
 
 const router = express.Router();
 
-router.post("/create", createMemo);
-router.post("/delete", deleteMemo);
-router.post("/save", saveMemo);
-router.post("/addbookmark", addBookmark);
-router.post("/removebookmark", removeBookmark);
+router.post("/createMemo", isLoggedin, createMemo);
+router.post("/delete", isLoggedin, deleteMemo);
+router.post("/save", isLoggedin, saveMemo);
+router.post("/addbookmark", isLoggedin, addBookmark);
+router.post("/removebookmark", isLoggedin, removeBookmark);
 
-router.get("/show", showMemo); // main에 메모리스트 전체 뜨는 것
-router.get("/view", viewMemo); // 하나의 메모 조회
+router.get("/getMemos", isLoggedin, showMemos); // main에 메모리스트 전체 뜨는 것
+router.get("/getMemo/:id", isLoggedin, viewMemo); // 하나의 메모 조회
 
 // router.post("/create", isLoggedin, createMemo);
 // router.post("/delete", isLoggedin, deleteMemo);
