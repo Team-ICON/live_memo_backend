@@ -26,11 +26,11 @@ const userSchema = new mongoose.Schema({
             "DEFAULT" : [],
             "BOOKMARK": []
         },
-    }, // {key: String, val: list[ ObjetID ]}
+    }, 
     memoList: {
         type: Map,
         default: {},
-    } // {key: ObjectID, val: String}
+    } 
 })
 
 const model = mongoose.model('User', userSchema);

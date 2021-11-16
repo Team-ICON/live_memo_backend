@@ -7,7 +7,6 @@ const User = mongoose.model('User');
 
 require('dotenv').config();
 
-
 passport.use(
   new GoogleStrategy(
     {
@@ -34,10 +33,6 @@ passport.use(
   )
 );
 
-export const userLogin = () => {
-    console.log('test');
-    passport.authenticate('google', {scope: ["profile", "email"]})
-}
 
 
 // Issue Token

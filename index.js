@@ -11,7 +11,6 @@ import memoRouter from "./src/Router/memoRouter";
 import userRouter from "./src/Router/userRouter";
 import folderRouter from "./src/Router/folderRouter";
 
-
 dotenv.config();
 import "./src/db";
 
@@ -23,13 +22,7 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
-app.use(cors())
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
 // google authentication
-// const passport = require('passport');
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
@@ -37,7 +30,6 @@ app.get('/', (req, res) => {
 })
 
 app.use('/user', userRouter);
-
 app.use('/memo', memoRouter);
 app.use('/folder', folderRouter);
 
