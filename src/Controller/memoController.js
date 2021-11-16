@@ -117,6 +117,21 @@ export const showMemo = (req, res) => { //메모 조회
     })
 }
 
+export const viewMemo = (req, res) => {
+    const { memoId } = req.body;
+    Memo.findOne({ID : memoId}, (err, result) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "err at viewMemo"});
+        }
+        if (result) {
+            return res.status(200).json({ result });
+        }
+    });
+
+    
+}
+
 export const saveMemo = (req, res) => {
     // 1. memo id, content 받아오기
     // const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
@@ -126,7 +141,10 @@ export const saveMemo = (req, res) => {
 
     // 2. db에서 해당 메모 찾기
     Memo.findOneAndUpdate({ID : memoId}, {updateTime: Date.now(), content : content}, (err, modified) => {
-        if (err) throw err;
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "memo saved failed"});
+        }
         return res.status(200).json({ "message": "memo saved successfully" });
     });
 }
