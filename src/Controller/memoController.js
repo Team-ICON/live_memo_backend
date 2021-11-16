@@ -26,7 +26,7 @@ export const createMemo = async (req, res) => {
     // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
             const memoId = newMemo._id;
             // memoList map을 가져온 뒤 수정 --> 다시 저장
-            User.findById(userId, (err, user) => {
+            User.findById(userId, await (err, user) => {
                 if (err) {
                     console.log(err);
                     return res.status(400).json({"message": "no such id"})
@@ -39,8 +39,7 @@ export const createMemo = async (req, res) => {
                 memoList.set(memoId, "");   // {생성된 메모id: "폴더 미지정"}
                 
                 // User DB에 변경사항 다시 저장
-                User.findByIdAndUpdate(userId, {memoList: memoList})
-                .exec(); // .exec() 써야하는건가??
+                await User.findByIdAndUpdate(userId, {memoList: memoList})
 
                 return res.status(200).json({ "message": "memo created successfully" });
             });
@@ -86,6 +85,6 @@ export const deleteMemo = (req, res) => {
     
 }
 
-export const exportMemo = (req, res) => {
+export const saveMemo = (req, res) => {
     
 }
