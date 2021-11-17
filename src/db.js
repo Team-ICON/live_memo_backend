@@ -2,15 +2,15 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.enwjy.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
+mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.uhzj6.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
     {   //options
-        useNewUrlParser: true, 
+        useNewUrlParser: true,
         useUnifiedTopology: true
     }
 )
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error'));
-db.once('open', function() {
+db.once('open', function () {
     console.log('✅ DB connected.')
 })

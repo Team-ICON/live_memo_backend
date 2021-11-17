@@ -1,6 +1,7 @@
 import express from "express";
 
-import { createMemo,
+import {
+    createMemo,
     deleteMemo,
     saveMemo,
     showMemos,
@@ -8,13 +9,13 @@ import { createMemo,
     removeBookmark,
     viewMemo,
     checkBookmark
- } from "../Controller/memoController";
+} from "../Controller/memoController";
 
 import { isLoggedin } from "../Services/AuthService";
 
 const router = express.Router();
 
-router.post("/createMemo", isLoggedin, createMemo);
+router.put("/createMemo", isLoggedin, createMemo);
 router.post("/delete", isLoggedin, deleteMemo);
 router.post("/save", isLoggedin, saveMemo);
 router.post("/addbookmark", isLoggedin, addBookmark);
