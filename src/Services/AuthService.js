@@ -4,6 +4,7 @@ const GoogleStrategy = require('passport-google-oauth2');
 const jwt = require('jsonwebtoken');
 let mongoose = require('mongoose');
 const User = mongoose.model('User');
+import session from "express-session";
 
 require('dotenv').config();
 
@@ -13,7 +14,7 @@ passport.use(
       // options for strategy
       callbackURL: `http://localhost:${process.env.PORT}/api/user/auth/google/callback/`,
       clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     },
     async (accessToken, refreshToken, profile, done) => {
         const email = profile.email;
@@ -34,14 +35,22 @@ passport.use(
 
 
 // Issue Token
-export const signToken = (req, res) => {
+export const signToken = async(req, res) => {
     console.log(`req.user`, req.user);
     jwt.sign({email: req.user.email, profileName: req.user.profileName, ID: req.user.ID }, process.env.JWT_SECRET, {expiresIn:'1 day'}, (err, token) => {
         if(err){
             return res.sendStatus(500);
         } else {
-            return res.status(200).json({token});
+            try {
+                // req.session.livememo = token;
+                res.cookie('livememo-token', token);
+                res.redirect(`http://localhost:3000/`);
+            } catch (err) {
+                console.log(`err`, err)
+            }
+            // return res.status(200).json({token});
         }
+        // res.redirect(`http://localhost:3000/${token}`);
     });
 }
 
