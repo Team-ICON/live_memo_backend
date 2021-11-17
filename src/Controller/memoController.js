@@ -75,58 +75,74 @@ export const createMemo = (req, res) => {
 }
 
 export const showMemos = (req, res) => { //메모 조회
-
     let user = req.user;
+    
+    // User.findOne({ ID: '618e50689f7b6b438695fc2c' }, (err, user) => {
     User.findOne({ ID: user.ID }, (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at showMemo" })
         }
 
-        let memoList = user.memoList;
-        // let memoIds = memoList.keys();
-        // console.log(`typeof(memoIds)`, typeof(memoIds));
+        try {
+            let memoList = user.memoList;
+            // let memoIds = memoList.keys();
+            // console.log(`typeof(memoIds)`, typeof(memoIds));
 
-        let bookmarkList = user.folderList.get("BOOKMARK");
+            let bookmarkList = user.folderList.get("BOOKMARK");
 
-        let arrangedList = [];
-        arrangedList.push(...bookmarkList);
+            let arrangedList = [];
+            
+            memoList.forEach((value, key) => {
+                if (!arrangedList.includes(key)) {
+                    arrangedList.push(key)
+                } 
+            });
+            arrangedList.push(...bookmarkList);
+            
+            Memo.find().where('ID').in(arrangedList).exec(async(err, records) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(400).json({"message": "err at showMemo"})
+                 }
+                 if (records) {
+                    // console.log(records);
+                    let result = [];
+                    records.forEach((element) => {
+                        let temp = new Object();
+                        temp.ID = element.ID;
+                        temp.content = element.content;
+                        temp.updateTime = element.updateTime;
+                        temp.howManyShare = element.userList.length;
 
-        memoList.forEach((value, key) => {
-            if (!arrangedList.includes(key)) {
-                arrangedList.push(key)
-            } 
-        });
+                        if (bookmarkList.includes(element.ID)) {   
+                            temp.bookmarked = "true";
+                        } else {
+                            temp.bookmarked = "false";
+                        }
+                        result.push(temp);
+                    });
+         
+                    result.sort((a, b) => {
+                        if (a.bookmarked === b.bookmarked) {
+                            return a.updateTime > b.updateTime ? -1: 1;
+                        }
+                        return a.bookmarked > b.bookmarked ? -1 : 1;
+                    })
 
-
-        console.log(`memoList`, memoList);
-        console.log(`bookmarkList`, bookmarkList);
-        console.log(`arrangedList`, arrangedList);
-        
-        /*
-        const ids =  [
-            '4ed3ede8844f0f351100000c',
-            '4ed3f117a844e0471100000d', 
-            '4ed3f18132f50c491100000e',
-        ];
-        
-        Model.find().where('_id').in(ids).exec((err, records) => {});
-        */
-
-       Memo.find().where('ID').in(arrangedList).exec((err, records) => {
-           if (err) {
-               console.log(err)
-               return res.status(400).json({"message": "err at showMemo"})
-            }
-            if (records) {
-                console.log(records)
-                return res.status(200).json({ "message": "오케이 계획대로 되고있어" });
-            }
-        })
+                    console.log(result);
+         
+                    return res.status(200).json({ result });
+                 }
+             })
+        } catch (err){
+            return res.status(200).json({"message": "작성 된 메모가 없습니다.", result: "작성된 메모가 없습니다."});
+        }
     })
 }
 
 export const viewMemo = (req, res) => {
+    // global []=
     let memoId = req.params.id;
     Memo.findOne({ID : memoId}, (err, result) => {
         if (err) {
@@ -137,6 +153,7 @@ export const viewMemo = (req, res) => {
             return res.status(200).json({ result });
         }
     });   
+    // 
 }
 
 export const saveMemo = (req, res) => {
