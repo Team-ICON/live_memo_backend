@@ -2,19 +2,20 @@ import Memo from "../model/memo";
 import User from "../model/user";
 
 
-export const showFolder = (req, res) => { //메모 조회
-    // let { userid } = req.body;
-    let userid = '618e50689f7b6b438695fc2c';
-    User.findOne({ ID: userId }, (err, user) => {
+export const showFolder = (req, res) => { //폴더 조회
+    const user = req.user;
+
+    User.findOne({ ID: user.ID }, (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({"message": "err at showFolder"});
         }
 
-        let folderList = user.folderList;
-        let folders = folderList.keys();
+        const folderList = user.folderList;
+        const folders = Array.from(folderList.keys());
 
-        return res.status(200).json({ folders });
+
+        return res.status(200).json({ success: true, folders: folders });
     })
 }
 
@@ -24,12 +25,12 @@ export const createFolder = (req, res) => { //폴더 생성
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { folderName } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "SeoL";
-    const folderName = "seoFolder";
+    const user = req.user;
+    const folderName = req.body.folderName;
     
     // 2. 해당 유저 데이터에서 folderListy-(map) 받아오고 수정
 
-    User.findOne({ID : userId}, async (err, user) => {
+    User.findOne({ID : user.ID}, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({"message": "no such id"})
@@ -38,16 +39,16 @@ export const createFolder = (req, res) => { //폴더 생성
         let folderList = user.folderList;
         // 이미 존재하는 폴더인 경우, 에러 처리
         if (folderList.has(folderName)) { 
-            console.log("already existing folder");
+            // console.log("already existing folder");
             return res.status(400).json({"message": "already existing folder"})
         }
     // 폴더 리스트에 폴더명 추가해주기
         folderList.set(folderName, []);
-        console.log(folderList);
+        // console.log(folderList);
 
     // 3. DB에 {folderList: folderList} 반영하기
-        await User.findOneAndUpdate({ID : userId}, {folderList: folderList});
-        return res.status(200).json({ "message": "folder created successfully" });
+        await User.findOneAndUpdate({ID : user.ID}, {folderList: folderList});
+        return res.status(200).json({ success: true, folders: folderList  });
     });
 }
 

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.uhzj6.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
+mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.wzvzu.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
     {   //options
         useNewUrlParser: true,
         useUnifiedTopology: true
