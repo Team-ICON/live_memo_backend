@@ -3,11 +3,7 @@ import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
-<<<<<<< HEAD
-import { moveFolderUtil } from "../utils";
-=======
 // import { moveFolderUtil } from "../utils";
->>>>>>> c8c47e2eb22ea1a1a67d40afaba407f3eaf5c036
 
 // async await        
 
