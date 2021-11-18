@@ -267,11 +267,13 @@ export const addBookmark = async (req, res) => {
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
         // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
         if (!memoList.has(memoId) || !folderList.has(afterFolderName)) {
+            console.log("!memoList.has(memoId)", !memoList.has(memoId))
+            console.log("!folderList.has(afterFolderName)", !folderList.has(afterFolderName))
             console.log("cannot find memo/folder");
             return res.status(400).json({ "message": "cannot find memo/folder" })
         }
 
-        if (folderList.get(afterFolderName).has(memoId)) {
+        if (folderList.get(afterFolderName).includes(memoId)) {
             console.log("already existing in BOOKMARK!");
             return res.status(400).json({ "message": "already exist in BOOKMARK!" })
         }
@@ -317,7 +319,7 @@ export const removeBookmark = (req, res) => {
             return res.status(400).json({ "message": "cannot find memo/folder" })
         }
 
-        if (folderList.get(afterFolderName).has(memoId)) {
+        if (folderList.get(afterFolderName).includes(memoId)) {
             console.log("already existing in DEFAULT!");
             return res.status(400).json({ "message": "already exist in DEFAULT!" })
         }
