@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const memoSchema = new mongoose.Schema({
-    ID: String,
+    _id: String,
     // roomId: String,
     content: String,
     createTime: { type: Date, default: Date.now() },

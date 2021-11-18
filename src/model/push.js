@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
 const pushSchema = new mongoose.Schema({
-    ID : String,
+    _id: String,
     fromUser: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     ],
-    body : String,
+    body: String,
     pushTime: { type: Date, default: Date.now() },
 })
 

@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
 const userSchema = new mongoose.Schema({
-    ID : {
+    _id: {
         type: String,
-        default: v4(),
+
     },
-    email: { 
+    email: {
         type: String,
         required: [true, 'email required'],
         unique: [true, 'email already registered']
@@ -16,21 +16,21 @@ const userSchema = new mongoose.Schema({
         default: ''
     },
     pushList: {
-        type : Array,
+        type: Array,
         ref: "Push",
         default: []
     },
     folderList: {
         type: Map,
         default: {
-            "DEFAULT" : [],
+            "DEFAULT": [],
             "BOOKMARK": []
         },
-    }, 
+    },
     memoList: {
         type: Map,
         default: {},
-    } 
+    }
 })
 
 const model = mongoose.model('User', userSchema);

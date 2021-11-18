@@ -9,7 +9,7 @@ import { moveFolderUtil } from "../utils2";
 
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
-    const { ID } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
+    const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
     // const userId = "SeoL";
 
@@ -18,7 +18,7 @@ export const createMemo = (req, res) => {
     //     ID: v4(),
     //     // roomId: v4(),
     //     content: "",
-    //     userList: [userId],
+    //    
     // }
 
     //유저 생성 test용
@@ -28,8 +28,7 @@ export const createMemo = (req, res) => {
     //     }
     //     console.log(user);
     // })
-
-    Memo.findOneAndUpdate({ ID: req.body._id, }, { content: req.body.body }, { new: true, upsert: true }, (err, memoInfo) => {
+    Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: [_id] }, { new: true, upsert: true }, (err, memoInfo) => {
         if (err) {
             console.log("err at createMemo");
             console.error(err);
@@ -37,9 +36,9 @@ export const createMemo = (req, res) => {
         }
         if (memoInfo) {
             // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
-            const memoId = memoInfo.ID;
+            const memoId = memoInfo._id;
             // memoList map을 가져온 뒤 수정 --> 다시 저장
-            User.findOne({ ID: ID }, async (err, user) => {
+            User.findOne({ _id: _id }, async (err, user) => {
                 if (err) {
                     console.log(err);
                     return res.status(400).json({ "message": "no such id" })
@@ -65,7 +64,7 @@ export const createMemo = (req, res) => {
                 // newFolderList.push(memoId);
 
                 // User DB에 변경사항 다시 저장
-                await User.findOneAndUpdate({ ID: ID }, { memoList: memoList, folderList: folderList })
+                await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
 
                 return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
             });
@@ -78,7 +77,7 @@ export const showMemos = (req, res) => { //메모 조회
     let user = req.user;
 
     // User.findOne({ ID: '618e50689f7b6b438695fc2c' }, (err, user) => {
-    User.findOne({ ID: user.ID }, (err, user) => {
+    User.findOne({ _id: user._id }).exec((err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at showMemo" })
@@ -86,6 +85,7 @@ export const showMemos = (req, res) => { //메모 조회
 
         try {
             let memoList = user.memoList;
+            console.log("memoList", memoList)
             // let memoIds = memoList.keys();
             // console.log(`typeof(memoIds)`, typeof(memoIds));
 
@@ -100,22 +100,22 @@ export const showMemos = (req, res) => { //메모 조회
             });
             arrangedList.push(...bookmarkList);
 
-            Memo.find().where('ID').in(arrangedList).exec(async (err, records) => {
+            Memo.find().where('_id').in(arrangedList).exec((err, records) => {
                 if (err) {
                     console.log(err)
                     return res.status(400).json({ "message": "err at showMemo" })
                 }
                 if (records) {
-                    // console.log(records);
+                    console.log("records", records);
                     let result = [];
                     records.forEach((element) => {
                         let temp = new Object();
-                        temp.ID = element.ID;
+                        temp._id = element._id;
                         temp.content = element.content;
                         temp.updateTime = element.updateTime;
                         temp.howManyShare = element.userList.length;
 
-                        if (bookmarkList.includes(element.ID)) {
+                        if (bookmarkList.includes(element._id)) {
                             temp.bookmarked = "true";
                         } else {
                             temp.bookmarked = "false";
@@ -129,7 +129,7 @@ export const showMemos = (req, res) => { //메모 조회
                         }
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
-
+                    console.log("-------------------------")
                     console.log(result);
 
                     return res.status(200).json({ success: true, memos: result });
@@ -143,19 +143,20 @@ export const showMemos = (req, res) => { //메모 조회
 
 export const viewMemo = (req, res) => {
     // global []=
-    let memoId = req.params.id;
-    Memo.findOne({ ID: memoId }, (err, result) => {
+
+    Memo.findOne({ "_id": req.params.id }).exec((err, result) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at viewMemo" });
         }
         if (result) {
+            console.log("memoCotroller 153:", result)
             return res.status(200).json({ success: true, memInfo: result });
         }
-    });
+    })
     // 
 }
-
+//이거는 나중에 시그널링 되고 다시 봐야할듯
 export const saveMemo = (req, res) => {
     // 1. memo id, content 받아오기
     // const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
@@ -164,7 +165,7 @@ export const saveMemo = (req, res) => {
     const body = "please";
 
     // 2. db에서 해당 메모 찾기
-    Memo.findOneAndUpdate({ ID: memoId }, { updateTime: Date.now(), body: body }, (err, modified) => {
+    Memo.findOneAndUpdate({ _id: memoId }, { updateTime: Date.now(), body: body }, (err, modified) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "memo saved failed" });
@@ -187,7 +188,7 @@ export const deleteMemo = (req, res) => {
     // 유저 데이터 
 
     // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거 
-    User.findOne({ ID: userId }, async (err, user) => {
+    User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such id" })
@@ -215,12 +216,12 @@ export const deleteMemo = (req, res) => {
         memoList.delete(memoId);
 
         // 6) 변경사항  DB에 저장
-        await User.findOneAndUpdate({ ID: userId }, { memoList: memoList, folderList: folderList });
+        await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
 
 
         ////////////////////////////////////////////////////////////////////////
         // 메모 데이터
-        Memo.findOne({ ID: memoId }, async (err, memo) => {
+        Memo.findOne({ _id: memoId }, async (err, memo) => {
 
             // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
             let userList = memo.userList;
@@ -229,7 +230,7 @@ export const deleteMemo = (req, res) => {
 
             // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
             if (userList.length === 0) {
-                Memo.deleteOne({ ID: memoId }, (err, res) => {
+                Memo.deleteOne({ _id: memoId }, (err, res) => {
                     if (err) {
                         console.log(err);
                         return res.status(400).json({ "message": "delete failed" })
@@ -238,7 +239,7 @@ export const deleteMemo = (req, res) => {
             }
 
             // 3) 변경사항  DB에 저장
-            await Memo.findOneAndUpdate({ ID: memoId }, { userList: userList });
+            await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
 
         })
         return res.status(200).json({ "message": "memo deleted successfully" });
@@ -282,7 +283,7 @@ export const checkBookmark = (req, res) => {
     const userId = "618e50689f7b6b438695fc2c";
     const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
 
-    User.findOne({ ID: userId }, async (err, user) => {
+    User.findOne({ _id: userId }, async (err, user) => {
         try {
             if (err) {
                 console.log(err);
@@ -302,13 +303,13 @@ export const checkBookmark = (req, res) => {
                 }
                 console.log(`folderList`, folderList);
                 console.log('bookmark removed');
-                await User.findOneAndUpdate({ ID: userId }, { folderList: folderList });
+                await User.findOneAndUpdate({ _id: userId }, { folderList: folderList });
                 return res.status(200).json({ "message": "remove at addbookmark" });
             } else {
                 // add check bookmarked;
                 bookmarkList.push(memoId);
                 console.log('bookmark added');
-                await User.findOneAndUpdate({ ID: userId }, { folderList: folderList });
+                await User.findOneAndUpdate({ _id: userId }, { folderList: folderList });
                 return res.status(200).json({ "message": "add at addbookmark" });
             }
         } catch (err) {
