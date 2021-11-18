@@ -3,7 +3,7 @@ import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
-import { moveFolderUtil } from "../utils2";
+import { moveFolderUtil } from "../utils";
 
 // async await        
 
@@ -85,7 +85,7 @@ export const showMemos = (req, res) => { //메모 조회
 
         try {
             let memoList = user.memoList;
-            console.log("memoList", memoList)
+            console.log("memoList memoController 88", memoList)
             // let memoIds = memoList.keys();
             // console.log(`typeof(memoIds)`, typeof(memoIds));
 
@@ -129,14 +129,14 @@ export const showMemos = (req, res) => { //메모 조회
                         }
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
-                    console.log("-------------------------")
+                    console.log("memoCounter 132 : ")
                     console.log(result);
 
                     return res.status(200).json({ success: true, memos: result });
                 }
             })
         } catch (err) {
-            return res.status(200).json({ "message": "작성 된 메모가 없습니다.", result: "작성된 메모가 없습니다." });
+            return res.status(400).json({ "message": "작성 된 메모가 없습니다.", result: "작성된 메모가 없습니다." });
         }
     })
 }
@@ -248,18 +248,20 @@ export const deleteMemo = (req, res) => {
 }
 
 export const addBookmark = async (req, res) => {
-    const userId = "618e50689f7b6b438695fc2c";
-    const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
+    // const userId = "618e50689f7b6b438695fc2c";
+    // const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
     const afterFolderName = "BOOKMARK";
+
+    console.log("memoController 255: ", req.user, " ", req.body)
 
     try {
         // moveFolderUtil(userId, memoId, afterFolderName, req, res);
-        let jojo = await moveFolderUtil(userId, memoId, afterFolderName);
+        let jojo = await moveFolderUtil(req.user._id, req.body.memoId, afterFolderName, req, res);
 
-        console.log(`jojo`, jojo);
-        jojo.then((err, siba) => {
-            console.log(`siba`, siba);
-        })
+        console.log("memoController 261", jojo);
+        // jojo.then((err, siba) => {
+        //     console.log(`siba`, siba);
+        // })
     } catch (err) {
         console.log(err)
     }
@@ -279,44 +281,4 @@ export const removeBookmark = (req, res) => {
 
 };
 
-export const checkBookmark = (req, res) => {
-    const userId = "618e50689f7b6b438695fc2c";
-    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
-
-    User.findOne({ _id: userId }, async (err, user) => {
-        try {
-            if (err) {
-                console.log(err);
-                return res.status(400).json({ "message": "err at addbookmark" });
-            }
-
-            let folderList = user.folderList;
-            console.log(`folderList`, folderList);
-            let bookmarkList = folderList.get("BOOKMARK");
-            console.log(`bookmarkList`, bookmarkList);
-            console.log(`bookmarkList.includes(memoId)`, bookmarkList.includes(memoId));
-            if (bookmarkList.includes(memoId)) {
-                // already bookmarked;
-                let bookmarkedIdx = bookmarkList.indexOf(memoId);
-                if (bookmarkedIdx > -1) {
-                    bookmarkList.splice(bookmarkedIdx, 1);
-                }
-                console.log(`folderList`, folderList);
-                console.log('bookmark removed');
-                await User.findOneAndUpdate({ _id: userId }, { folderList: folderList });
-                return res.status(200).json({ "message": "remove at addbookmark" });
-            } else {
-                // add check bookmarked;
-                bookmarkList.push(memoId);
-                console.log('bookmark added');
-                await User.findOneAndUpdate({ _id: userId }, { folderList: folderList });
-                return res.status(200).json({ "message": "add at addbookmark" });
-            }
-        } catch (err) {
-            console.log(err);
-            return res.status(400).json({ "message": "something happened in checkBookmark" });
-        }
-    })
-}
-
-
+// 
