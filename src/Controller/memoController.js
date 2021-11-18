@@ -3,7 +3,7 @@ import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
-import { moveFolderUtil } from "../utils2";
+// import { moveFolderUtil } from "../utils";
 
 // async await        
 
@@ -252,17 +252,45 @@ export const addBookmark = async (req, res) => {
     const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
     const afterFolderName = "BOOKMARK";
 
-    try {
-        // moveFolderUtil(userId, memoId, afterFolderName, req, res);
-        let jojo = await moveFolderUtil(userId, memoId, afterFolderName);
+    // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
+    User.findOne({_id : userId}, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "no such id"})
+        }
+        let folderList = user.folderList;
+        let memoList = user.memoList;
+        const beforeFolderName = memoList.get(memoId);
+        // 받아온 메모id가 있는지 확인 필요
+        // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
+        // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
+        if (!memoList.has(memoId) || !folderList.has(afterFolderName)) {
+                console.log("cannot find memo/folder");
+                return res.status(400).json({"message": "cannot find memo/folder"})
+        }
 
-        console.log(`jojo`, jojo);
-        jojo.then((err, siba) => {
-            console.log(`siba`, siba);
-        })
-    } catch (err) {
-        console.log(err)
-    }
+        if (folderList.get(afterFolderName).has(memoId)) {
+                console.log("already existing in BOOKMARK!");
+                return res.status(400).json({"message": "already exist in BOOKMARK!"})
+        }
+
+        // 3. memoList에서 해당 메모ID 의 폴더명 변경
+        memoList.set(memoId, afterFolderName);
+    
+        // 4-1. folderList의 기존 폴더 리스트에서 해당 메모ID 지우기
+        const beforeFolderList = folderList.get(beforeFolderName).filter(item => item !== memoId);
+
+        // 4-2. folderList의 이동할 폴더 리스트에서 해당 메모ID 추가
+        const afterFolderList = folderList.get(afterFolderName)
+        afterFolderList.push(memoId);
+
+        // DB에 {memoList: memoList, folderList: folderList} 반영
+        folderList.set(beforeFolderName, beforeFolderList);
+        folderList.set(afterFolderName, afterFolderList);
+        await User.findOneAndUpdate({ID : userId}, {memoList: memoList, folderList: folderList});
+        return res.status(200).json({ "message": "moved successfully" });
+    
+    });
 };
 
 export const removeBookmark = (req, res) => {
@@ -270,12 +298,45 @@ export const removeBookmark = (req, res) => {
     const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
     const afterFolderName = "DEFAULT";
 
-    // moveFolderUtil(userId, memoId, afterFolderName, req, res);
-    let momo = moveFolderUtil(userId, memoId, afterFolderName);
-    console.log(`momo`, momo);
-    momo.then((err, siba) => {
-        console.log(`siba`, siba);
-    })
+    // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
+    User.findOne({_id : userId}, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({"message": "no such id"})
+        }
+        let folderList = user.folderList;
+        let memoList = user.memoList;
+        const beforeFolderName = memoList.get(memoId);
+        // 받아온 메모id가 있는지 확인 필요
+        // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
+        // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
+        if (!memoList.has(memoId) || !folderList.has(afterFolderName)) {
+                console.log("cannot find memo/folder");
+                return res.status(400).json({"message": "cannot find memo/folder"})
+        }
+
+        if (folderList.get(afterFolderName).has(memoId)) {
+                console.log("already existing in DEFAULT!");
+                return res.status(400).json({"message": "already exist in DEFAULT!"})
+        }
+
+        // 3. memoList에서 해당 메모ID 의 폴더명 변경
+        memoList.set(memoId, afterFolderName);
+    
+        // 4-1. folderList의 기존 폴더 리스트에서 해당 메모ID 지우기
+        const beforeFolderList = folderList.get(beforeFolderName).filter(item => item !== memoId);
+
+        // 4-2. folderList의 이동할 폴더 리스트에서 해당 메모ID 추가
+        const afterFolderList = folderList.get(afterFolderName)
+        afterFolderList.push(memoId);
+
+        // DB에 {memoList: memoList, folderList: folderList} 반영
+        folderList.set(beforeFolderName, beforeFolderList);
+        folderList.set(afterFolderName, afterFolderList);
+        await User.findOneAndUpdate({ID : userId}, {memoList: memoList, folderList: folderList});
+        return res.status(200).json({ "message": "moved successfully" });
+    
+    });
 
 };
 

@@ -140,9 +140,14 @@ export const moveFolder = (req, res) => { //메모 이동
         // 받아온 메모id가 있는지 확인 필요
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
         // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
-        if (!memoList.has(memoId) || memoList.get(memoId) !== beforeFolderName || !folderList.has(afterFolderName)) {
-                console.log("cannot find memo/folder");
-                return res.status(400).json({"message": "cannot find memo/folder"})
+        if (!memoList.has(memoId) || !folderList.has(afterFolderName)) {
+            console.log("cannot find memo/folder");
+            return res.status(400).json({"message": "cannot find memo/folder"})
+        }
+
+        if (folderList.get(afterFolderName).has(memoId)) {
+            console.log("already exist!");
+            return res.status(400).json({"message": "already exist!"})
         }
 
         // 3. memoList에서 해당 메모ID 의 폴더명 변경
