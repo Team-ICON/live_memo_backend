@@ -131,8 +131,10 @@ export const showMemos = (req, res) => { //메모 조회
                     })
                     console.log("memoCounter 132 : ")
                     console.log(result);
+                    setTimeout(() => {
+                        return res.status(200).json({ success: true, memos: result });
+                    }, 1000);
 
-                    return res.status(200).json({ success: true, memos: result });
                 }
             })
         } catch (err) {

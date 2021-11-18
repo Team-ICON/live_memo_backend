@@ -4,7 +4,8 @@ import Ydoc from "./src/model/memo";
 import cors from "cors";
 import passport from 'passport';
 
-var bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 
 /* Routers */
 import memoRouter from "./src/Router/memoRouter";
@@ -39,17 +40,19 @@ app.use(session({
 
 /* 미들웨어 */
 app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
+app.use(cookieParser());
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // google authentication
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', (req, res) => {
-    console.log('hellooo')
-    res.send('Hello world');
+  console.log('hellooo')
+  res.send('Hello world');
 })
 
 app.use('/api/user', userRouter);
@@ -58,5 +61,5 @@ app.use('/api/folder', folderRouter);
 
 
 app.listen(process.env.PORT, () => {
-    console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
+  console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
 })
