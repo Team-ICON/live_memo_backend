@@ -14,7 +14,7 @@ passport.use(
     new GoogleStrategy(
         {
             // options for strategy
-            callbackURL: `http://localhost:${process.env.PORT}/api/user/auth/google/callback/`,
+            callbackURL: `https://livememo-backend.herokuapp.com/api/user/auth/google/callback/`,
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
