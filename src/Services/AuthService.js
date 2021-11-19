@@ -45,7 +45,8 @@ export const signToken = async (req, res) => {
         } else {
             try {
                 // req.session.livememo = token;
-                res.cookie('livememo-token', token);
+                // res.cookie('livememo-token', token);
+                console.log(`redirect gogo`, redirect);
                 res.redirect(`https://live-memo-610d4.firebaseapp.com/`);
                 // res.redirect(`http://localhost:3000/`);
             } catch (err) {
