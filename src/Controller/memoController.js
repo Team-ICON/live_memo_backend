@@ -353,8 +353,6 @@ export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail
     const memoId = req.body.memoId
     
-    console.log(userEmail, memoId);
-
     //test용
     // const userEmail = "seo@test.com";
     // const memoId = "test";
