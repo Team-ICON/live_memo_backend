@@ -350,10 +350,10 @@ export const removeBookmark = (req, res) => {
 
 
 export const addUser = async (req, res) => {
-    /* 추가할 userId, 메모 Id
-    const userEmail = req.user.email
+    const userEmail = req.body.userEmail
     const memoId = req.body.memoId
-    */
+    
+    console.log(userEmail, memoId);
 
     //test용
     // const userEmail = "seo@test.com";
@@ -365,6 +365,11 @@ export const addUser = async (req, res) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "cannot find this email" })
+        }
+
+        if (!user) {
+            console.log("no such user!");
+            return res.status(400).json({ "message": "cannot find this email" });
         }
         // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
         let userId = user._id;
