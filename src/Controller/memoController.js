@@ -11,7 +11,7 @@ export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    // const userId = "SeoL";
+    // const _id = "61979faae63242a5ac10edb9";
 
     // 2. 빈 메모 생성해서 DB에 넣어주기
     // const newMemo = {
@@ -28,6 +28,7 @@ export const createMemo = (req, res) => {
     //     }
     //     console.log(user);
     // })
+
     Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: [_id] }, { new: true, upsert: true }, (err, memoInfo) => {
         if (err) {
             console.log("err at createMemo");
@@ -38,6 +39,7 @@ export const createMemo = (req, res) => {
             // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
             const memoId = memoInfo._id;
             // memoList map을 가져온 뒤 수정 --> 다시 저장
+
             User.findOne({ _id: _id }, async (err, user) => {
                 if (err) {
                     console.log(err);
@@ -346,4 +348,62 @@ export const removeBookmark = (req, res) => {
 
 };
 
-// 
+
+export const addUser = async (req, res) => {
+    /* 추가할 userId, 메모 Id
+    const userEmail = req.user.email
+    const memoId = req.body.memoId
+    */
+
+    //test용
+    // const userEmail = "seo@test.com";
+    // const memoId = "test";
+
+    // User
+    // 추가할 사용자를 이메일 주소로 검색한다
+    User.findOne({ email: userEmail }, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "cannot find this email" })
+        }
+        // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
+        let userId = user._id;
+        let folderList = user.folderList;
+        let memoList = user.memoList;
+
+        if (!memoList) { // 추가하려는 유저가 memoList가 없는 경우(undefined)
+            memoList = new Map();
+        }
+
+        if (!folderList) { // 추가하려는 유저가 folderList 없는 경우(undefined)
+            folderList = new Map();
+            folderList.set("DEFAULT", []);
+            folderList.set("BOOKMARK", []);
+        }
+
+        // 추가하려는 유저의 메모리스트에 이미 해당 메모가 있는 경우 예외 처리( 중복 추가 방지 )
+        if (memoList.has(memoId)) {
+            console.log("already exist!");
+            return res.status(400).json({ "message": "already exist!" })
+        }
+        
+        // 메모리스트 내, 해당 메모 추가하기 + 폴더리스트의 default 폴더에 해당 메모 추가하기
+        memoList.set(memoId, "DEFAULT");
+        folderList.get("DEFAULT").push(memoId);
+
+        Memo.findOne({ _id: memoId }, async (err, memo) => {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({ "message": "no such memo" })
+            }
+            let userList = memo.userList;
+            userList.push(userId);
+
+            // db에 업데이트 해주기
+            await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
+            await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
+
+            return res.status(200).json({ "message": "add user successfully" });
+        });
+    });
+}

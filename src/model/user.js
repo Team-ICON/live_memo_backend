@@ -4,7 +4,6 @@ import { v4 } from 'uuid';
 const userSchema = new mongoose.Schema({
     _id: {
         type: String,
-
     },
     email: {
         type: String,
