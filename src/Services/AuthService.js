@@ -46,7 +46,7 @@ export const signToken = async (req, res) => {
             try {
                 // req.session.livememo = token;
                 res.cookie('livememo-token', token);
-                res.redirect(`http://localhost:3000/`);
+                res.redirect(`https://localhost:3000/`);
             } catch (err) {
                 console.log(`err`, err)
             }
