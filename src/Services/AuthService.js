@@ -44,10 +44,12 @@ export const signToken = async (req, res) => {
             return res.sendStatus(500);
         } else {
             try {
+                console.log('token json send');
+                return res.status(200).json({ token });
                 // req.session.livememo = token;
-                res.cookie('livememo-token', token);
-                console.log(`redirect gogo`);
-                res.redirect(`https://live-memo-610d4.web.app/`);
+                // res.cookie('livememo-token', token);
+                // console.log(`redirect gogo`);
+                // res.redirect(`https://live-memo-610d4.web.app/`);
                 // res.redirect(`http://localhost:3000/`);
             } catch (err) {
                 console.log(`err`, err)
