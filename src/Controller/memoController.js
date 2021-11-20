@@ -30,6 +30,7 @@ export const createMemo = (req, res) => {
     // })
     Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: [_id] }, { new: true, upsert: true }, (err, memoInfo) => {
         if (err) {
+            console.log(req.body)
             console.log("err at createMemo");
             console.error(err);
             return res.status(400).json({ "message": "err.message" });
@@ -106,7 +107,6 @@ export const showMemos = (req, res) => { //메모 조회
                     return res.status(400).json({ "message": "err at showMemo" })
                 }
                 if (records) {
-                    console.log("records", records);
                     let result = [];
                     records.forEach((element) => {
                         let temp = new Object();
@@ -129,12 +129,9 @@ export const showMemos = (req, res) => { //메모 조회
                         }
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
-                    console.log("memoCounter 132 : ")
-                    console.log(result);
-                    setTimeout(() => {
-                        return res.status(200).json({ success: true, memos: result });
-                    }, 1000);
 
+
+                    return res.status(200).json({ success: true, memos: result });
                 }
             })
         } catch (err) {
@@ -152,7 +149,7 @@ export const viewMemo = (req, res) => {
             return res.status(400).json({ "message": "err at viewMemo" });
         }
         if (result) {
-            console.log("memoCotroller 153:", result)
+
             return res.status(200).json({ success: true, memInfo: result });
         }
     })
@@ -179,18 +176,17 @@ export const saveMemo = (req, res) => {
 export const deleteMemo = (req, res) => {
 
     // userid, memoid 가져오기 
-    // const { userId } = req.body; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
-    // const { memoId } = req.body;
+    const { _id } = req.user; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
+    const { memoId } = req.body;
 
     // test용 유저 그냥 해봄
-    const userId = "SeoL";
-    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
+    console.log(_id, memoId);
 
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터 
 
     // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거 
-    User.findOne({ _id: userId }, async (err, user) => {
+    User.findOne({ _id: _id }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such id" })
@@ -218,7 +214,7 @@ export const deleteMemo = (req, res) => {
         memoList.delete(memoId);
 
         // 6) 변경사항  DB에 저장
-        await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
+        await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList });
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -228,7 +224,7 @@ export const deleteMemo = (req, res) => {
             // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
             let userList = memo.userList;
 
-            userList = userList.filter(item => item !== userId);
+            userList = userList.filter(item => item !== _id);
 
             // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
             if (userList.length === 0) {
