@@ -191,12 +191,42 @@ export const viewMemo = (req, res) => {
 
             let clonedMemo = JSON.parse(JSON.stringify(memo))
             clonedMemo.userList = newUserObjectList;
+            memo.connectionNum = memo.connectionNum + 1
+            clonedMemo.connectionNum = memo.connectionNum + 1;
             console.log(clonedMemo);
 
             return res.status(200).json({ success: true, memInfo: clonedMemo });
         });
     })
 }
+
+export const disconnectMemo = (req, res) => {
+
+
+
+
+    Memo.findOne({ "_id": req.params.id }, (err, memo) => {
+
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "err at viewMemo" });
+        }
+
+        if (!memo) {
+            console.log("no such memo!");
+            return res.status(400).json({ "message": "no such memo!" });
+        }
+        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
+
+        memo.connectionNum = memo.connectionNum - 1 > 0 ? memo.connectionNum - 1 : 0;
+
+        return res.status(200).json({ success: true, memInfo: memo })
+
+
+    })
+}
+
+
 //이거는 나중에 시그널링 되고 다시 봐야할듯
 export const saveMemo = (req, res) => {
     // 1. memo id, content 받아오기
