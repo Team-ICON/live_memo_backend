@@ -149,9 +149,10 @@ export const viewMemo = (req, res) => {
     
     // 받은 id로 해당 메모 찾는다
     // const userId = "6197a5dfb2cdee4640e169cc" 
-    const memoId = "test" 
-    // Memo.findOne({ "_id": req.params.id }).exec((err, memo) => {
-    Memo.findOne({ _id: memoId}, (err, memo) => {
+    // const memoId = "test" 
+    
+    Memo.findOne({ "_id": req.params.id }, (err, memo) => {
+  
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at viewMemo" });
