@@ -143,19 +143,59 @@ export const showMemos = (req, res) => { //메모 조회
 }
 
 export const viewMemo = (req, res) => {
-    // global []=
 
-    Memo.findOne({ "_id": req.params.id }).exec((err, result) => {
+    // 받은 id로 해당 메모 찾는다
+    // const userId = "6197a5dfb2cdee4640e169cc" 
+    // const memoId = "test" 
+
+    const userId = req.user._id;
+
+    Memo.findOne({ "_id": req.params.id }, (err, memo) => {
+
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at viewMemo" });
         }
-        if (result) {
 
-            return res.status(200).json({ success: true, memInfo: result });
+        if (!memo) {
+            console.log("no such memo!");
+            return res.status(400).json({ "message": "no such memo!" });
         }
+        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
+
+        const userIdList = memo.userList || [];
+
+        const userProfileNameList = [];
+        const newUserObjectList = [];
+        const userPictureList = [];
+
+        User.find({
+            _id: { $in: userIdList }
+        }, function (err, users) {
+            users.forEach(user => {
+                userProfileNameList.push(user.profileName);
+                userPictureList.push(user.picture);
+            });
+
+
+            for (let i = 0; i < userIdList.length; i++) {
+                if (userIdList[i] === userId) {
+                    continue;
+                }
+                newUserObjectList.push({
+                    "_id": userIdList[i] || "",
+                    "profileName": userProfileNameList[i] || "",
+                    "picture": userPictureList[i] || ""
+                })
+            }
+
+            let clonedMemo = JSON.parse(JSON.stringify(memo))
+            clonedMemo.userList = newUserObjectList;
+            console.log(clonedMemo);
+
+            return res.status(200).json({ success: true, memInfo: clonedMemo });
+        });
     })
-    // 
 }
 //이거는 나중에 시그널링 되고 다시 봐야할듯
 export const saveMemo = (req, res) => {
@@ -177,57 +217,42 @@ export const saveMemo = (req, res) => {
 
 export const deleteMemo = (req, res) => {
 
-    // userid, memoid 가져오기 
+    // userid, memoid 가져오기
     const { _id } = req.user; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
     const { memoId } = req.body;
-
     // test용 유저 그냥 해봄
     console.log(_id, memoId);
-
     ////////////////////////////////////////////////////////////////////////
-    // 유저 데이터 
-
-    // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거 
+    // 유저 데이터
+    // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거
     User.findOne({ _id: _id }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such id" })
         }
-
         //  1) folderlist map,  memolist map 가져오기
         let folderList = user.folderList;
         let memoList = user.memoList;
-
         //  2) 삭제해야할 메모를 가지고 있는 폴더 찾기
         let targetFolder = memoList.get(memoId);
-
         // 3) memolist map에 ("memoId") 있는지 확인하기
         if (!targetFolder) {
             console.log("no such memo");
             return res.status(400).json({ "message": "no such memo" })
         }
-
         // 4) 찾은 폴더에서 메모 삭제하고 폴더 갱신하기
         const newTargetFolderList = folderList.get(targetFolder).filter(item => item !== memoId);
         folderList.set(targetFolder, newTargetFolderList);
-
-
-        // 5) 찾은 메모 delete 
+        // 5) 찾은 메모 delete
         memoList.delete(memoId);
-
         // 6) 변경사항  DB에 저장
         await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList });
-
-
         ////////////////////////////////////////////////////////////////////////
         // 메모 데이터
         Memo.findOne({ _id: memoId }, async (err, memo) => {
-
             // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
             let userList = memo.userList;
-
             userList = userList.filter(item => item !== _id);
-
             // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
             if (userList.length === 0) {
                 Memo.deleteOne({ _id: memoId }, (err, res) => {
@@ -237,14 +262,11 @@ export const deleteMemo = (req, res) => {
                     }
                 })
             }
-
             // 3) 변경사항  DB에 저장
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
-
         })
         return res.status(200).json({ "message": "memo deleted successfully" });
     })
-
 }
 
 export const addBookmark = async (req, res) => {
@@ -344,14 +366,13 @@ export const removeBookmark = (req, res) => {
 
 };
 
-
 export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail
     const memoId = req.body.memoId
-    
+
     //test용
-    // const userEmail = "seo@test.com";
-    // const memoId = "test";
+    // const userEmail = "test@test.com";
+    // const memoId = "6198a082fbb0a29d0154b5f5";
 
     // User
     // 추가할 사용자를 이메일 주소로 검색한다
@@ -369,6 +390,8 @@ export const addUser = async (req, res) => {
         let userId = user._id;
         let folderList = user.folderList;
         let memoList = user.memoList;
+        const profileName = user.profileName || "";
+        const picture = user.picture || "";
 
         if (!memoList) { // 추가하려는 유저가 memoList가 없는 경우(undefined)
             memoList = new Map();
@@ -385,7 +408,7 @@ export const addUser = async (req, res) => {
             console.log("already exist!");
             return res.status(400).json({ "message": "already exist!" })
         }
-        
+
         // 메모리스트 내, 해당 메모 추가하기 + 폴더리스트의 default 폴더에 해당 메모 추가하기
         memoList.set(memoId, "DEFAULT");
         folderList.get("DEFAULT").push(memoId);
@@ -402,7 +425,7 @@ export const addUser = async (req, res) => {
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
 
-            return res.status(200).json({ "message": "add user successfully" });
+            return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "profileName": profileName, "picture": picture } });
         });
     });
 }

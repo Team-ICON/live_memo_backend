@@ -15,7 +15,7 @@ import folderRouter from "./src/Router/folderRouter";
 dotenv.config();
 import "./src/db";
 
-// https 적용
+// // https ver1
 // const https = require('https');
 // const fs = require('fs');
 // const options = {
@@ -28,7 +28,23 @@ import "./src/db";
 // https.createServer(options, (req, res) => {
 //   res.writeHead(200);
 //   res.end('hello SecureSign\n');
-// }).listen(4000);
+// }).listen(5000);
+
+
+// // https ver2
+// const https = require('https');
+// const fs = require('fs');
+// // Create an HTTP service.
+// http.createServer(app).listen(3000);
+
+// const options = {
+//   ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'),
+//   key: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/privkey.pem'),
+//   cert: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/cert.pem')
+// };
+// // Create an HTTPS service identical to the HTTP service.
+// https.createServer(options, app).listen(5000);
+///////////////////////////////////////////////
 
 const app = express();
 const PORT = process.env.PORT || 33333;
