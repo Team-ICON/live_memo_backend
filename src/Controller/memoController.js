@@ -180,58 +180,42 @@ export const saveMemo = (req, res) => {
 
 export const deleteMemo = (req, res) => {
 
-    // userid, memoid 가져오기 
-    // const { userId } = req.body; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
-    // const { memoId } = req.body;
-
+    // userid, memoid 가져오기
+    const { _id } = req.user; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
+    const { memoId } = req.body;
     // test용 유저 그냥 해봄
-    const userId = "SeoL";
-    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
-
+    console.log(_id, memoId);
     ////////////////////////////////////////////////////////////////////////
-    // 유저 데이터 
-
-    // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거 
-    User.findOne({ _id: userId }, async (err, user) => {
+    // 유저 데이터
+    // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거
+    User.findOne({ _id: _id }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such id" })
         }
-
         //  1) folderlist map,  memolist map 가져오기
         let folderList = user.folderList;
         let memoList = user.memoList;
-
         //  2) 삭제해야할 메모를 가지고 있는 폴더 찾기
         let targetFolder = memoList.get(memoId);
-
         // 3) memolist map에 ("memoId") 있는지 확인하기
         if (!targetFolder) {
             console.log("no such memo");
             return res.status(400).json({ "message": "no such memo" })
         }
-
         // 4) 찾은 폴더에서 메모 삭제하고 폴더 갱신하기
         const newTargetFolderList = folderList.get(targetFolder).filter(item => item !== memoId);
         folderList.set(targetFolder, newTargetFolderList);
-
-
-        // 5) 찾은 메모 delete 
+        // 5) 찾은 메모 delete
         memoList.delete(memoId);
-
         // 6) 변경사항  DB에 저장
-        await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
-
-
+        await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList });
         ////////////////////////////////////////////////////////////////////////
         // 메모 데이터
         Memo.findOne({ _id: memoId }, async (err, memo) => {
-
             // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
             let userList = memo.userList;
-
-            userList = userList.filter(item => item !== userId);
-
+            userList = userList.filter(item => item !== _id);
             // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
             if (userList.length === 0) {
                 Memo.deleteOne({ _id: memoId }, (err, res) => {
@@ -241,14 +225,11 @@ export const deleteMemo = (req, res) => {
                     }
                 })
             }
-
             // 3) 변경사항  DB에 저장
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
-
         })
         return res.status(200).json({ "message": "memo deleted successfully" });
     })
-
 }
 
 export const addBookmark = async (req, res) => {
@@ -406,7 +387,7 @@ export const addUser = async (req, res) => {
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
 
-            return res.status(200).json({ "message": "add user successfully" });
+            return res.status(200).json({ success: true, "message": "add user successfully" });
         });
     });
 }
