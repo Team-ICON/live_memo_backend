@@ -128,7 +128,6 @@ export const showMemos = (req, res) => { //메모 조회
                     return res.status(400).json({ "message": "err at showMemo" })
                 }
                 if (records) {
-                    // console.log("records", records);
                     let result = [];
                     records.forEach((element) => {
                         let temp = new Object();
@@ -151,12 +150,9 @@ export const showMemos = (req, res) => { //메모 조회
                         }
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
-                    // console.log("memoCounter 132 : ")
-                    // console.log(result);
-                    setTimeout(() => {
-                        return res.status(200).json({ success: true, memos: result });
-                    }, 1000);
 
+
+                    return res.status(200).json({ success: true, memos: result });
                 }
             })
         } catch (err) {
@@ -190,25 +186,22 @@ export const viewMemo = (req, res) => {
         const newUserIdList = [];
         const userProfileNameList = [];
         const userPictureList = [];
-        const newUserObjectList = [];
 
         User.find({
             _id: { $in: userIdList }
         }, function (err, users) {
             users.forEach(user => {
-                newUserIdList.push(user._id);
                 userProfileNameList.push(user.profileName);
                 userPictureList.push(user.picture);
             });
 
 
             for (let i = 0; i < userIdList.length; i++) {
-
-                if (newUserIdList[i] === userId) {
+                if (userIdList[i] === userId) {
                     continue;
                 }
                 newUserObjectList.push({
-                    "_id": newUserIdList[i] || "",
+                    "_id": userIdList[i] || "",
                     "profileName": userProfileNameList[i] || "",
                     "picture": userPictureList[i] || ""
                 })
@@ -216,7 +209,7 @@ export const viewMemo = (req, res) => {
 
             let clonedMemo = JSON.parse(JSON.stringify(memo))
             clonedMemo.userList = newUserObjectList;
-
+            console.log(clonedMemo);
 
             return res.status(200).json({ success: true, memInfo: clonedMemo });
         });

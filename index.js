@@ -49,6 +49,8 @@ import "./src/db";
 const app = express();
 const PORT = process.env.PORT || 33333;
 const session = require('express-session');	//세션관리용 미들웨어
+const server = require("http").createServer(app);
+
 
 
 app.use(session({
@@ -70,6 +72,13 @@ app.use(session({
 //     res.header("Access-Control-Allow-Origin", "*");
 //     next();
 // });
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 
 
 /* 미들웨어 */
@@ -93,6 +102,22 @@ app.use('/api/user', userRouter);
 app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
 
+//음성 webrtc
+io.on("connection", (socket) => {
+  socket.emit("me", socket.id);
+
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded")
+  });
+
+  socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+    io.to(userToCall).emit("callUser", { signal: signalData, from, name });
+  });
+
+  socket.on("answerCall", (data) => {
+    io.to(data.to).emit("callAccepted", data.signal)
+  });
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
