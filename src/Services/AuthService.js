@@ -14,7 +14,7 @@ passport.use(
     new GoogleStrategy(
         {
             // options for strategy
-            callbackURL: `http://localhost:${process.env.PORT}/api/user/auth/google/callback/`,
+            callbackURL: `https://livememo-backend.herokuapp.com/api/user/auth/google/callback/`,
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
@@ -44,9 +44,13 @@ export const signToken = async (req, res) => {
             return res.sendStatus(500);
         } else {
             try {
+                console.log('token json send');
+                return res.status(200).json({ token });
                 // req.session.livememo = token;
-                res.cookie('livememo-token', token);
-                res.redirect(`http://localhost:3000/`);
+                // res.cookie('livememo-token', token);
+                // console.log(`redirect gogo`);
+                // res.redirect(`https://live-memo-610d4.web.app/`);
+                // res.redirect(`http://localhost:3000/`);
             } catch (err) {
                 console.log(`err`, err)
             }
