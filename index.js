@@ -21,8 +21,8 @@ const fs = require('fs');
 const options = {
   key: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/privkey.pem'), //(개인키 지정/)
   cert: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/cert.pem'), //(서버인증서 지정)
-  ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'), //(루트체인 지정) -> chain이냐 ,, fullchain이냐..
-  minVersion: "TLSv1.2" //(서버 환경에 따라 선택적 적용) -> 서버 환경을 어케알지
+  ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'), //(루트체인 지정) 
+  minVersion: "TLSv1.2" //(서버 환경에 따라 선택적 적용) 
 };
 
 https.createServer(options, (req, res) => {
