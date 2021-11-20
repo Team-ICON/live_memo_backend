@@ -181,9 +181,9 @@ export const viewMemo = (req, res) => {
 
                 for (let i = 0; i < userIdList.length; i++) {
                     newUserObjectList.push({
-                        "_id": userIdList[i],
-                        "profileName": userProfileNameList[i], 
-                        "picture": userPictureList[i]
+                        "_id": userIdList[i] || "",
+                        "profileName": userProfileNameList[i] || "", 
+                        "picture": userPictureList[i] || ""
                     })
                 }
 
@@ -387,8 +387,8 @@ export const addUser = async (req, res) => {
         let userId = user._id;
         let folderList = user.folderList;
         let memoList = user.memoList;
-        const profileName = user.profileName;
-        const picture = user.picture;
+        const profileName = user.profileName || "";
+        const picture = user.picture || "";
 
         if (!memoList) { // 추가하려는 유저가 memoList가 없는 경우(undefined)
             memoList = new Map();
