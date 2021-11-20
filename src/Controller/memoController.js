@@ -150,7 +150,9 @@ export const viewMemo = (req, res) => {
     // 받은 id로 해당 메모 찾는다
     // const userId = "6197a5dfb2cdee4640e169cc" 
     // const memoId = "test" 
-    
+
+    const userId = req.user._id;
+
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
   
         if (err) {
@@ -180,15 +182,19 @@ export const viewMemo = (req, res) => {
 
 
                 for (let i = 0; i < userIdList.length; i++) {
+                    if (userIdList[i] === userId) {
+                        continue;
+                    }
                     newUserObjectList.push({
                         "_id": userIdList[i],
-                        "profileName": userProfileNameList[i], 
-                        "picture": userPictureList[i]
+                        "profileName": userProfileNameList[i] || "", 
+                        "picture": userPictureList[i] || ""
                     })
                 }
 
                 let clonedMemo = JSON.parse(JSON.stringify(memo))
                 clonedMemo.userList = newUserObjectList;
+                console.log(clonedMemo);
 
                 return res.status(200).json({ success: true, memInfo: clonedMemo });
         });
