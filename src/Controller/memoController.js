@@ -422,7 +422,7 @@ export const addUser = async (req, res) => {
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
 
-            return res.status(200).json({ "message": "add user successfully" , "userdata": {"profileName": profileName, "picture": picture}});
+            return res.status(200).json({ success: true, "message": "add user successfully" , "userdata": {"profileName": profileName, "picture": picture}});
         });
     });
 }

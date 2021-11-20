@@ -15,11 +15,7 @@ import folderRouter from "./src/Router/folderRouter";
 dotenv.config();
 import "./src/db";
 
-<<<<<<< HEAD
 // https 적용
-=======
-// // https 적용
->>>>>>> 75afebf6a854a3f2b3522d9a21d9e575a1e7d4fc
 // const https = require('https');
 // const fs = require('fs');
 // const options = {
