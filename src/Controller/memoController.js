@@ -186,22 +186,25 @@ export const viewMemo = (req, res) => {
         const newUserIdList = [];
         const userProfileNameList = [];
         const userPictureList = [];
+        const newUserObjectList = [];
 
         User.find({
             _id: { $in: userIdList }
         }, function (err, users) {
             users.forEach(user => {
+                newUserIdList.push(user._id);
                 userProfileNameList.push(user.profileName);
                 userPictureList.push(user.picture);
             });
 
 
             for (let i = 0; i < userIdList.length; i++) {
-                if (userIdList[i] === userId) {
+
+                if (newUserIdList[i] === userId) {
                     continue;
                 }
                 newUserObjectList.push({
-                    "_id": userIdList[i] || "",
+                    "_id": newUserIdList[i] || "",
                     "profileName": userProfileNameList[i] || "",
                     "picture": userPictureList[i] || ""
                 })
@@ -209,7 +212,7 @@ export const viewMemo = (req, res) => {
 
             let clonedMemo = JSON.parse(JSON.stringify(memo))
             clonedMemo.userList = newUserObjectList;
-            console.log(clonedMemo);
+
 
             return res.status(200).json({ success: true, memInfo: clonedMemo });
         });
