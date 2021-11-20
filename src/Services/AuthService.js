@@ -21,6 +21,7 @@ passport.use(
         async (accessToken, refreshToken, profile, done) => {
             const email = profile.email;
             const profileName = profile.displayName;
+            const picture = profile.picture;
             // check if user already exists
             const currentUser = await User.findOne({ email: email });
             if (currentUser) {
@@ -28,7 +29,7 @@ passport.use(
                 return done(null, currentUser);
             } else {
                 // register user and return
-                const newUser = await new User({ _id: v4(), email: email, profileName: profileName }).save();
+                const newUser = await new User({ _id: v4(), email: email, profileName: profileName, picture: picture }).save();
                 return done(null, newUser);
             }
         }

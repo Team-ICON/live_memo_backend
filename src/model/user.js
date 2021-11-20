@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    picture: {
+        type: String,
+    },
     pushList: {
         type: Array,
         ref: "Push",
