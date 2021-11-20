@@ -146,19 +146,52 @@ export const showMemos = (req, res) => { //메모 조회
 }
 
 export const viewMemo = (req, res) => {
-    // global []=
-
-    Memo.findOne({ "_id": req.params.id }).exec((err, result) => {
+    
+    // 받은 id로 해당 메모 찾는다
+    // const userId = "6197a5dfb2cdee4640e169cc" 
+    const memoId = "test" 
+    // Memo.findOne({ "_id": req.params.id }).exec((err, memo) => {
+    Memo.findOne({ _id: memoId}, (err, memo) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at viewMemo" });
         }
-        if (result) {
-            console.log("memoCotroller 153:", result)
-            return res.status(200).json({ success: true, memInfo: result });
+
+        if (!memo) {
+            console.log("no such memo!");
+            return res.status(400).json({ "message": "no such memo!" });
         }
+    // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
+
+        const userIdList = memo.userList || [];
+
+        const userProfileNameList = [];
+        const newUserObjectList = [];
+        const userPictureList = [];
+        
+        User.find({
+            _id: { $in: userIdList }
+            }, function(err, users){
+                users.forEach(user => {
+                    userProfileNameList.push(user.profileName);
+                    userPictureList.push(user.picture);
+                });
+
+
+                for (let i = 0; i < userIdList.length; i++) {
+                    newUserObjectList.push({
+                        "_id": userIdList[i],
+                        "profileName": userProfileNameList[i], 
+                        "picture": userPictureList[i]
+                    })
+                }
+
+                let clonedMemo = JSON.parse(JSON.stringify(memo))
+                clonedMemo.userList = newUserObjectList;
+
+                return res.status(200).json({ success: true, memInfo: clonedMemo });
+        });
     })
-    // 
 }
 //이거는 나중에 시그널링 되고 다시 봐야할듯
 export const saveMemo = (req, res) => {
@@ -354,8 +387,8 @@ export const addUser = async (req, res) => {
     const memoId = req.body.memoId
     
     //test용
-    // const userEmail = "seo@test.com";
-    // const memoId = "test";
+    // const userEmail = "test@test.com";
+    // const memoId = "6198a082fbb0a29d0154b5f5";
 
     // User
     // 추가할 사용자를 이메일 주소로 검색한다
@@ -373,6 +406,8 @@ export const addUser = async (req, res) => {
         let userId = user._id;
         let folderList = user.folderList;
         let memoList = user.memoList;
+        const profileName = user.profileName;
+        const picture = user.picture;
 
         if (!memoList) { // 추가하려는 유저가 memoList가 없는 경우(undefined)
             memoList = new Map();
@@ -406,7 +441,7 @@ export const addUser = async (req, res) => {
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
 
-            return res.status(200).json({ "message": "add user successfully" });
+            return res.status(200).json({ "message": "add user successfully" , "userdata": {"profileName": profileName, "picture": picture}});
         });
     });
 }

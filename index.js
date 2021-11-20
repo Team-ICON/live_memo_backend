@@ -15,20 +15,20 @@ import folderRouter from "./src/Router/folderRouter";
 dotenv.config();
 import "./src/db";
 
-// https 적용
-const https = require('https');
-const fs = require('fs');
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/privkey.pem'), //(개인키 지정/)
-  cert: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/cert.pem'), //(서버인증서 지정)
-  ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'), //(루트체인 지정) 
-  minVersion: "TLSv1.2" //(서버 환경에 따라 선택적 적용) 
-};
+// // https 적용
+// const https = require('https');
+// const fs = require('fs');
+// const options = {
+//   key: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/privkey.pem'), //(개인키 지정/)
+//   cert: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/cert.pem'), //(서버인증서 지정)
+//   ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'), //(루트체인 지정) 
+//   minVersion: "TLSv1.2" //(서버 환경에 따라 선택적 적용) 
+// };
 
-https.createServer(options, (req, res) => {
-  res.writeHead(200);
-  res.end('hello SecureSign\n');
-}).listen(4000);
+// https.createServer(options, (req, res) => {
+//   res.writeHead(200);
+//   res.end('hello SecureSign\n');
+// }).listen(4000);
 
 const app = express();
 const PORT = process.env.PORT || 33333;
