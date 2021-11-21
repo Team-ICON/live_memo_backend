@@ -14,7 +14,8 @@ passport.use(
     new GoogleStrategy(
         {
             // options for strategy
-            callbackURL: `https://livememo-backend.herokuapp.com/api/user/auth/google/callback/`,
+            // callbackURL: `https://livememo-backend.herokuapp.com/api/user/auth/google/callback/`,
+            callbackURL: `http://localhost:4000/api/user/auth/google/callback/`,
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         },
@@ -39,17 +40,18 @@ passport.use(
 // Issue Token
 export const signToken = async (req, res) => {
     console.log(`req.user`, req.user);
-    jwt.sign({ email: req.user.email, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '1 day' }, (err, token) => {
+    jwt.sign({ email: req.user.email, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '30 day' }, (err, token) => {
         if (err) {
             return res.sendStatus(500);
         } else {
             try {
                 console.log('token json send');
-                return res.status(200).json({ token });
+                res.cookie('live-token', token)
+                res.redirect(`http://localhost:3000`);
+                // return res.status(200).json({ token });
                 // req.session.livememo = token;
                 // res.cookie('livememo-token', token);
                 // console.log(`redirect gogo`);
-                // res.redirect(`https://live-memo-610d4.web.app/`);
                 // res.redirect(`http://localhost:3000/`);
             } catch (err) {
                 console.log(`err`, err)
