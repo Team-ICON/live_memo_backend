@@ -85,6 +85,7 @@ export const createMemo = (req, res) => {
             return res.status(200).json({ "message": "memo updated successfully", data: memoInfo });
         }
         console.log(roomsStatus)
+        console.log(checkUser)
         Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
             if (err) {
                 console.log("err at createMemo");
