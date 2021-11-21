@@ -151,6 +151,8 @@ export const viewMemo = (req, res) => {
     // const userId = "6197a5dfb2cdee4640e169cc" 
     // const memoId = "test" 
     
+    const userId = req.user._id;
+
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
   
         if (err) {
@@ -180,6 +182,7 @@ export const viewMemo = (req, res) => {
 
 
                 for (let i = 0; i < userIdList.length; i++) {
+                    if (userIdList[i] === userId)
                     newUserObjectList.push({
                         "_id": userIdList[i] || "",
                         "profileName": userProfileNameList[i] || "", 
