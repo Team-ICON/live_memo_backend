@@ -27,7 +27,6 @@ export const createMemo = (req, res) => {
     //     }
     //     console.log(user);
     // })
-    let checkUser = req.user;
 
 
     let IsQuit = req.body.quit;
@@ -57,7 +56,7 @@ export const createMemo = (req, res) => {
                 roomsStatus[memoInfo._id] = (val - 1 < 0 ? 0 : val - 1)
             }
         }
-
+        console.log(roomsStatus)
         Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
             if (err) {
                 console.log("err at createMemo");
@@ -90,7 +89,7 @@ export const createMemo = (req, res) => {
                     // User DB에 변경사항 다시 저장
                     await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
                 });
-                return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
+                return res.status(200).json({ "message": "memo created successfully", data: memoInfo, roomsStatus });
             }
         })
     })
@@ -263,6 +262,11 @@ export const deleteMemo = (req, res) => {
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터
     // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거
+    let curMem = roomsStatus[memoId]
+
+    roomsStatus[memoId] = curMem - 1
+
+    console.log("current Room status memocontroller 269", roomsStatus)
     User.findOne({ _id: _id }, async (err, user) => {
         if (err) {
             console.log(err);

@@ -39,8 +39,8 @@ passport.use(
 
 // Issue Token
 export const signToken = async (req, res) => {
-    console.log(`req.user`, req.user);
-    jwt.sign({ email: req.user.email, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '1 day' }, (err, token) => {
+    console.log(`42 req.user`, req.user);
+    jwt.sign({ email: req.user.email, profileName: req.user.profileName, picture: req.user.picture, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '1 day' }, (err, token) => {
         if (err) {
             return res.sendStatus(500);
         } else {
