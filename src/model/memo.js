@@ -7,10 +7,7 @@ const memoSchema = new mongoose.Schema({
     createTime: { type: Date, default: Date.now() },
     updateTime: { type: Date, default: Date.now() },
     userList: [String],
-    connectionNum: {
-        type: Number,
-        default: 0
-    }
+
 })
 
 const model = mongoose.model('Memo', memoSchema);

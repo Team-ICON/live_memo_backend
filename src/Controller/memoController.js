@@ -1,3 +1,4 @@
+
 import Memo from "../model/memo";
 import User from "../model/user";
 import mongoose from "mongoose";
@@ -6,10 +7,12 @@ import { v4 } from 'uuid';
 // import { moveFolderUtil } from "../utils";
 
 // async await        
+let roomsStatus = {}
 
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
+
     // test용 유저 그냥 해봄
     // const _id = "61979faae63242a5ac10edb9";
 
@@ -28,51 +31,85 @@ export const createMemo = (req, res) => {
     //     }
     //     console.log(user);
     // })
+    let IsQuit = req.body.quit;
+    let checkUser = req.user;
+    // 업데이트 전에 userList 체크 해주기 위해
 
-    Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: [_id] }, { new: true, upsert: true }, (err, memoInfo) => {
+
+    Memo.findOne({ _id: req.body._id }, (err, memoInfo) => {
         if (err) {
-            console.log(req.body)
-            console.log("err at createMemo");
+            console.log("error find ID");
             console.error(err);
             return res.status(400).json({ "message": "err.message" });
         }
-        if (memoInfo) {
-            // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
-            const memoId = memoInfo._id;
-            // memoList map을 가져온 뒤 수정 --> 다시 저장
+        const _userList = memoInfo?.userList;
 
-            User.findOne({ _id: _id }, async (err, user) => {
-                if (err) {
-                    console.log(err);
-                    return res.status(400).json({ "message": "no such id" })
-                }
 
-                let memoList = user.memoList;
-                let folderList = user.folderList;
-
-                if (!memoList) { // memoList 없는 경우(undefined)
-                    memoList = new Map();
-                }
-
-                if (!folderList) { // folderList 없는 경우(undefined)
-                    folderList = new Map();
-                    folderList.set("DEFAULT", []);
-                    folderList.set("BOOKMARK", []);
-                }
-
-                memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
-                folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
-
-                // const newFolderList = folderList.get("DEFAULT")
-                // newFolderList.push(memoId);
-
-                // User DB에 변경사항 다시 저장
-                await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
-
-                return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
-            });
+        if (_userList) {
+            checkUser = _userList;
         }
+
+        if (IsQuit) {
+            let val = roomsStatus[memoInfo._id]
+
+            if (val === undefined) {
+                roomsStatus[memoInfo._id] = 0
+            }
+            else {
+                roomsStatus[memoInfo._id] = (val - 1 < 0 ? 0 : val - 1)
+            }
+        }
+
+        console.log("current room status memoContorller 64: ", roomsStatus)
+        Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
+            if (err) {
+                console.log("err at createMemo");
+                console.error(err);
+                return res.status(400).json({ "message": "err.message" });
+            }
+            if (memoInfo) {
+                // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
+                const memoId = memoInfo._id;
+
+                // memoList map을 가져온 뒤 수정 --> 다시 저장
+
+                User.findOne({ _id: _id }, async (err, user) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(400).json({ "message": "no such id" })
+                    }
+
+                    let memoList = user.memoList;
+                    let folderList = user.folderList;
+
+                    if (!memoList) { // memoList 없는 경우(undefined)
+                        memoList = new Map();
+                    }
+
+                    if (!folderList) { // folderList 없는 경우(undefined)
+                        folderList = new Map();
+                        folderList.set("DEFAULT", []);
+                        folderList.set("BOOKMARK", []);
+                    }
+
+                    memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
+                    folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
+
+                    // const newFolderList = folderList.get("DEFAULT")
+                    // newFolderList.push(memoId);
+
+                    // User DB에 변경사항 다시 저장
+                    await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
+                });
+
+                return res.status(200).json({ "message": "memo created successfully", data: memoInfo, roomsStatus });
+            }
+
+
+        })
+
     })
+
 
 }
 
@@ -88,7 +125,7 @@ export const showMemos = (req, res) => { //메모 조회
 
         try {
             let memoList = user.memoList;
-            console.log("memoList memoController 88", memoList)
+            // console.log("memoList memoController 88", memoList)
             // let memoIds = memoList.keys();
             // console.log(`typeof(memoIds)`, typeof(memoIds));
 
@@ -148,10 +185,9 @@ export const viewMemo = (req, res) => {
     // const userId = "6197a5dfb2cdee4640e169cc" 
     // const memoId = "test" 
 
+
     const userId = req.user._id;
-
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
-
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at viewMemo" });
@@ -163,68 +199,58 @@ export const viewMemo = (req, res) => {
         }
         // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
 
-        const userIdList = memo.userList || [];
+        let curMem = roomsStatus[memo._id]
+        if (curMem === undefined)
+            roomsStatus[memo._id] = 1
+        else
+            roomsStatus[memo._id] = curMem + 1
 
+
+        console.log("current Room status memocontroller 210", roomsStatus)
+
+        const userIdList = memo.userList || [];
+        const newUserIdList = [];
         const userProfileNameList = [];
-        const newUserObjectList = [];
         const userPictureList = [];
+        const newUserObjectList = [];
 
         User.find({
             _id: { $in: userIdList }
         }, function (err, users) {
             users.forEach(user => {
+                newUserIdList.push(user._id);
                 userProfileNameList.push(user.profileName);
                 userPictureList.push(user.picture);
             });
 
 
             for (let i = 0; i < userIdList.length; i++) {
-                if (userIdList[i] === userId) {
+
+                if (newUserIdList[i] === userId) {
                     continue;
                 }
                 newUserObjectList.push({
-                    "_id": userIdList[i] || "",
+                    "_id": newUserIdList[i] || "",
                     "profileName": userProfileNameList[i] || "",
                     "picture": userPictureList[i] || ""
                 })
             }
 
             let clonedMemo = JSON.parse(JSON.stringify(memo))
-            clonedMemo.userList = newUserObjectList;
-            memo.connectionNum = memo.connectionNum + 1
-            clonedMemo.connectionNum = memo.connectionNum + 1;
-            console.log(clonedMemo);
 
-            return res.status(200).json({ success: true, memInfo: clonedMemo });
+
+            clonedMemo.userList = newUserObjectList;
+
+
+
+            return res.status(200).json({ success: true, memInfo: clonedMemo, roomsStatus });
         });
     })
+
 }
 
-export const disconnectMemo = (req, res) => {
 
 
-
-
-    Memo.findOne({ "_id": req.params.id }, (err, memo) => {
-
-        if (err) {
-            console.log(err);
-            return res.status(400).json({ "message": "err at viewMemo" });
-        }
-
-        if (!memo) {
-            console.log("no such memo!");
-            return res.status(400).json({ "message": "no such memo!" });
-        }
-        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
-
-        memo.connectionNum = memo.connectionNum - 1 > 0 ? memo.connectionNum - 1 : 0;
-
-        return res.status(200).json({ success: true, memInfo: memo })
-
-
-    })
-}
 
 
 //이거는 나중에 시그널링 되고 다시 봐야할듯
