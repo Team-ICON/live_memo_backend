@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
+
     // test용 유저 그냥 해봄
     // const _id = "61979faae63242a5ac10edb9";
 
@@ -29,49 +30,68 @@ export const createMemo = (req, res) => {
     //     console.log(user);
     // })
 
-    Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: [_id] }, { new: true, upsert: true }, (err, memoInfo) => {
+    let checkUser = req.user;
+    // 업데이트 전에 userList 체크 해주기 위해
+    Memo.findOne({ _id: req.body._id }, (err, memoInfo) => {
         if (err) {
-            console.log("err at createMemo");
+            console.log("error find ID");
             console.error(err);
             return res.status(400).json({ "message": "err.message" });
         }
-        if (memoInfo) {
-            // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
-            const memoId = memoInfo._id;
-            // memoList map을 가져온 뒤 수정 --> 다시 저장
+        const _userList = memoInfo?.userList;
 
-            User.findOne({ _id: _id }, async (err, user) => {
-                if (err) {
-                    console.log(err);
-                    return res.status(400).json({ "message": "no such id" })
-                }
+        if (_userList) {
+            checkUser = _userList;
+        }
 
-                let memoList = user.memoList;
-                let folderList = user.folderList;
+        Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
+            if (err) {
+                console.log("err at createMemo");
+                console.error(err);
+                return res.status(400).json({ "message": "err.message" });
+            }
+            if (memoInfo) {
+                // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
+                const memoId = memoInfo._id;
+                // memoList map을 가져온 뒤 수정 --> 다시 저장
 
-                if (!memoList) { // memoList 없는 경우(undefined)
-                    memoList = new Map();
-                }
+                User.findOne({ _id: _id }, async (err, user) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(400).json({ "message": "no such id" })
+                    }
 
-                if (!folderList) { // folderList 없는 경우(undefined)
-                    folderList = new Map();
-                    folderList.set("DEFAULT", []);
-                    folderList.set("BOOKMARK", []);
-                }
+                    let memoList = user.memoList;
+                    let folderList = user.folderList;
 
-                memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
-                folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
+                    if (!memoList) { // memoList 없는 경우(undefined)
+                        memoList = new Map();
+                    }
 
-                // const newFolderList = folderList.get("DEFAULT")
-                // newFolderList.push(memoId);
+                    if (!folderList) { // folderList 없는 경우(undefined)
+                        folderList = new Map();
+                        folderList.set("DEFAULT", []);
+                        folderList.set("BOOKMARK", []);
+                    }
 
-                // User DB에 변경사항 다시 저장
-                await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
+                    memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
+                    folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
+
+                    // const newFolderList = folderList.get("DEFAULT")
+                    // newFolderList.push(memoId);
+
+                    // User DB에 변경사항 다시 저장
+                    await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
+                });
 
                 return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
-            });
-        }
+            }
+
+
+        })
+
     })
+
 
 }
 
@@ -87,7 +107,7 @@ export const showMemos = (req, res) => { //메모 조회
 
         try {
             let memoList = user.memoList;
-            console.log("memoList memoController 88", memoList)
+            // console.log("memoList memoController 88", memoList)
             // let memoIds = memoList.keys();
             // console.log(`typeof(memoIds)`, typeof(memoIds));
 
@@ -108,7 +128,6 @@ export const showMemos = (req, res) => { //메모 조회
                     return res.status(400).json({ "message": "err at showMemo" })
                 }
                 if (records) {
-                    console.log("records", records);
                     let result = [];
                     records.forEach((element) => {
                         let temp = new Object();
@@ -131,12 +150,9 @@ export const showMemos = (req, res) => { //메모 조회
                         }
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
-                    console.log("memoCounter 132 : ")
-                    console.log(result);
-                    setTimeout(() => {
-                        return res.status(200).json({ success: true, memos: result });
-                    }, 1000);
 
+
+                    return res.status(200).json({ success: true, memos: result });
                 }
             })
         } catch (err) {
@@ -146,15 +162,14 @@ export const showMemos = (req, res) => { //메모 조회
 }
 
 export const viewMemo = (req, res) => {
-    
+
     // 받은 id로 해당 메모 찾는다
     // const userId = "6197a5dfb2cdee4640e169cc" 
     // const memoId = "test" 
-    
     const userId = req.user._id;
 
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
-  
+
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at viewMemo" });
@@ -164,36 +179,41 @@ export const viewMemo = (req, res) => {
             console.log("no such memo!");
             return res.status(400).json({ "message": "no such memo!" });
         }
-    // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
+        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
 
         const userIdList = memo.userList || [];
-
+        const newUserIdList = [];
         const userProfileNameList = [];
-        const newUserObjectList = [];
         const userPictureList = [];
-        
+        const newUserObjectList = [];
+
         User.find({
             _id: { $in: userIdList }
-            }, function(err, users){
-                users.forEach(user => {
-                    userProfileNameList.push(user.profileName);
-                    userPictureList.push(user.picture);
-                });
+        }, function (err, users) {
+            users.forEach(user => {
+                newUserIdList.push(user._id);
+                userProfileNameList.push(user.profileName);
+                userPictureList.push(user.picture);
+            });
 
 
-                for (let i = 0; i < userIdList.length; i++) {
-                    if (userIdList[i] === userId)
-                    newUserObjectList.push({
-                        "_id": userIdList[i] || "",
-                        "profileName": userProfileNameList[i] || "", 
-                        "picture": userPictureList[i] || ""
-                    })
+            for (let i = 0; i < userIdList.length; i++) {
+
+                if (newUserIdList[i] === userId) {
+                    continue;
                 }
+                newUserObjectList.push({
+                    "_id": newUserIdList[i] || "",
+                    "profileName": userProfileNameList[i] || "",
+                    "picture": userPictureList[i] || ""
+                })
+            }
 
-                let clonedMemo = JSON.parse(JSON.stringify(memo))
-                clonedMemo.userList = newUserObjectList;
+            let clonedMemo = JSON.parse(JSON.stringify(memo))
+            clonedMemo.userList = newUserObjectList;
 
-                return res.status(200).json({ success: true, memInfo: clonedMemo });
+
+            return res.status(200).json({ success: true, memInfo: clonedMemo });
         });
     })
 }
@@ -369,7 +389,7 @@ export const removeBookmark = (req, res) => {
 export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail
     const memoId = req.body.memoId
-    
+
     //test용
     // const userEmail = "test@test.com";
     // const memoId = "6198a082fbb0a29d0154b5f5";
@@ -408,7 +428,7 @@ export const addUser = async (req, res) => {
             console.log("already exist!");
             return res.status(400).json({ "message": "already exist!" })
         }
-        
+
         // 메모리스트 내, 해당 메모 추가하기 + 폴더리스트의 default 폴더에 해당 메모 추가하기
         memoList.set(memoId, "DEFAULT");
         folderList.get("DEFAULT").push(memoId);
@@ -425,7 +445,7 @@ export const addUser = async (req, res) => {
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
 
-            return res.status(200).json({ success: true, "message": "add user successfully" , "userdata": {"profileName": profileName, "picture": picture}});
+            return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "profileName": profileName, "picture": picture } });
         });
     });
 }
