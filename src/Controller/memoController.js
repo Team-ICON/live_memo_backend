@@ -11,30 +11,15 @@ let roomsStatus = {}
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
-    // test용 유저 그냥 해봄
-    // const _id = "61979faae63242a5ac10edb9";
-    // 2. 빈 메모 생성해서 DB에 넣어주기
-    // const newMemo = {
-    //     ID: v4(),
-    //     // roomId: v4(),
-    //     content: "",
-    //    
-    // }
-    //유저 생성 test용
-    // User.create({email: "seo@test.com"}, (err, user) => {
-    //     if(err) {
-    //         console.log(err);
-    //     }
-    //     console.log(user);
-    // })
 
+    // test용 
+    // const _id = "6197a5dfb2cdee4640e169cc"; //user
+    // const memoId = "final";
+    // const memoContent ="final"
 
-    let IsQuit = req.body.quit;
-    let checkUser = req.user;
+    // 수정전 
+    Memo.findOneAndUpdate({ _id: req.body._id, }, { title: req.body.title, content: req.body.body, updateTime: Date.now() }, { new: true, upsert: true }, async (err, memoInfo) => {
 
-
-    // 업데이트 전에 userList 체크 해주기 위해
-    Memo.findOne({ _id: req.body._id }, (err, memoInfo) => {
         if (err) {
             console.log("error find ID");
             console.error(err);
@@ -44,8 +29,10 @@ export const createMemo = (req, res) => {
         if (_userList) {
             checkUser = _userList;
         }
+        let IsQuit = req.body.quit;
+        let checkUser = req.user;
 
-
+        //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
             let val = roomsStatus[memoInfo._id]
 
@@ -55,6 +42,47 @@ export const createMemo = (req, res) => {
             else {
                 roomsStatus[memoInfo._id] = (val - 1 < 0 ? 0 : val - 1)
             }
+        }
+
+        if (req.body.first) {
+            // 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
+            const memoId = memoInfo._id;
+
+            // 생성된 메모의 userList에 userId 넣어주기
+            await Memo.findOneAndUpdate({ _id: memoId }, { userList: [_id] })
+
+            User.findOne({ _id: _id }, async (err, user) => {
+                if (err) {
+                    console.log(err);
+                    return res.status(400).json({ "message": "no such id" })
+                }
+
+                let memoList = user.memoList;
+                let folderList = user.folderList;
+
+                if (!memoList) { // memoList 없는 경우(undefined)
+                    memoList = new Map();
+                }
+
+                if (!folderList) { // folderList 없는 경우(undefined)
+                    folderList = new Map();
+                    folderList.set("DEFAULT", []);
+                    folderList.set("BOOKMARK", []);
+                }
+
+                memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
+                if (!folderList.get("DEFAULT").includes(memoId)) {
+                    folderList.get("DEFAULT").push(memoId);
+                }
+
+                // User DB에 변경사항 다시 저장
+                await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
+                return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
+            });
+        }
+        // 메모 업데이트(처음 생성 아닌 경우)
+        else {
+            return res.status(200).json({ "message": "memo updated successfully", data: memoInfo });
         }
         console.log(roomsStatus)
         Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
@@ -93,6 +121,7 @@ export const createMemo = (req, res) => {
             }
         })
     })
+
 }
 
 export const showMemos = (req, res) => { //메모 조회
@@ -151,7 +180,7 @@ export const showMemos = (req, res) => { //메모 조회
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
 
-
+                    console.log(result);
                     return res.status(200).json({ success: true, memos: result });
                 }
             })
@@ -287,8 +316,7 @@ export const deleteMemo = (req, res) => {
         folderList.set(targetFolder, newTargetFolderList);
         // 5) 찾은 메모 delete
         memoList.delete(memoId);
-        // 6) 변경사항  DB에 저장
-        await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList });
+
         ////////////////////////////////////////////////////////////////////////
         // 메모 데이터
         Memo.findOne({ _id: memoId }, async (err, memo) => {
@@ -306,6 +334,7 @@ export const deleteMemo = (req, res) => {
             }
             // 3) 변경사항  DB에 저장
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
+            await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList });
         })
         return res.status(200).json({ "message": "memo deleted successfully" });
     })
@@ -375,6 +404,12 @@ export const removeBookmark = (req, res) => {
         let folderList = user.folderList;
         let memoList = user.memoList;
         const beforeFolderName = memoList.get(memoId);
+
+        if (beforeFolderName !== "BOOKMARK") {
+            console.log("this is not bookmarked memo");
+            return res.status(400).json({ "message": "this is not bookmarked memo" });
+        }
+
         // 받아온 메모id가 있는지 확인 필요
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
         // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
