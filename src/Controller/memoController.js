@@ -30,6 +30,7 @@ export const createMemo = (req, res) => {
     //     console.log(user);
     // })
 
+
     let checkUser = req.user;
     // 업데이트 전에 userList 체크 해주기 위해
     Memo.findOne({ _id: req.body._id }, (err, memoInfo) => {
@@ -43,6 +44,7 @@ export const createMemo = (req, res) => {
         if (_userList) {
             checkUser = _userList;
         }
+
 
         Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
             if (err) {
@@ -388,8 +390,10 @@ export const removeBookmark = (req, res) => {
 };
 
 export const addUser = async (req, res) => {
-    const userEmail = req.body.userEmail
-    const memoId = req.body.memoId
+    const userEmail = req.body.userEmail;
+    const memoId = req.body.memoId;
+    // 메모를 만든 유저 아이디
+    const _userId = req.user;
 
     //test용
     // const userEmail = "test@test.com";
@@ -439,8 +443,17 @@ export const addUser = async (req, res) => {
                 console.log(err);
                 return res.status(400).json({ "message": "no such memo" })
             }
-            let userList = memo.userList;
-            userList.push(userId);
+            let userList = memo?.userList;
+
+
+            if(userList){
+                userList.push(userId);
+
+            }
+            else{
+                userList = [_userId._id];
+                userList.push(userId);
+            }
 
             // db에 업데이트 해주기
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
