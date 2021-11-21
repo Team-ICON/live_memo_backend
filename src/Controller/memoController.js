@@ -11,90 +11,58 @@ export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
 
-    // test용 유저 그냥 해봄
-    // const _id = "61979faae63242a5ac10edb9";
+    // test용 
+    // const _id = "6197a5dfb2cdee4640e169cc"; //user
+    // const memoId = "final";
+    // const memoContent = "final"
 
-    // 2. 빈 메모 생성해서 DB에 넣어주기
-    // const newMemo = {
-    //     ID: v4(),
-    //     // roomId: v4(),
-    //     content: "",
-    //    
-    // }
-
-    //유저 생성 test용
-    // User.create({email: "seo@test.com"}, (err, user) => {
-    //     if(err) {
-    //         console.log(err);
-    //     }
-    //     console.log(user);
-    // })
-
-
-    let checkUser = req.user;
-    // 업데이트 전에 userList 체크 해주기 위해
-    Memo.findOne({ _id: req.body._id }, (err, memoInfo) => {
+    Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, updateTime: Date.now() }, { new: true, upsert: true }, (err, memoInfo) => {
         if (err) {
-            console.log("error find ID");
+            console.log("err at createMemo");
             console.error(err);
             return res.status(400).json({ "message": "err.message" });
         }
-        const _userList = memoInfo?.userList;
 
-        if (_userList) {
-            checkUser = _userList;
+        // 처음 메모 생성하는 경우 : 생성시간이랑 업데이트 시간 딜레이가 6초 아래면 처음 생성이라 판단
+        if ((parseInt(memoInfo.updateTime / 1000) - parseInt(memoInfo.createTime / 1000) < 6)) {
+            // 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
+            const memoId = memoInfo._id;
+
+            // 생성된 메모의 userList에 userId 넣어주기
+            Memo.findOneAndUpdate({ _id: memoId }, { userList: [_id] })
+
+            User.findOne({ _id: _id }, async (err, user) => {
+                if (err) {
+                    console.log(err);
+                    return res.status(400).json({ "message": "no such id" })
+                }
+
+                let memoList = user.memoList;
+                let folderList = user.folderList;
+
+                if (!memoList) { // memoList 없는 경우(undefined)
+                    memoList = new Map();
+                }
+
+                if (!folderList) { // folderList 없는 경우(undefined)
+                    folderList = new Map();
+                    folderList.set("DEFAULT", []);
+                    folderList.set("BOOKMARK", []);
+                }
+
+                memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
+                folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
+
+                // User DB에 변경사항 다시 저장
+                await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
+            });
+            return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
         }
-
-
-        Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
-            if (err) {
-                console.log("err at createMemo");
-                console.error(err);
-                return res.status(400).json({ "message": "err.message" });
-            }
-            if (memoInfo) {
-                // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
-                const memoId = memoInfo._id;
-                // memoList map을 가져온 뒤 수정 --> 다시 저장
-
-                User.findOne({ _id: _id }, async (err, user) => {
-                    if (err) {
-                        console.log(err);
-                        return res.status(400).json({ "message": "no such id" })
-                    }
-
-                    let memoList = user.memoList;
-                    let folderList = user.folderList;
-
-                    if (!memoList) { // memoList 없는 경우(undefined)
-                        memoList = new Map();
-                    }
-
-                    if (!folderList) { // folderList 없는 경우(undefined)
-                        folderList = new Map();
-                        folderList.set("DEFAULT", []);
-                        folderList.set("BOOKMARK", []);
-                    }
-
-                    memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
-                    folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
-
-                    // const newFolderList = folderList.get("DEFAULT")
-                    // newFolderList.push(memoId);
-
-                    // User DB에 변경사항 다시 저장
-                    await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
-                });
-
-                return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
-            }
-
-
-        })
-
+        // 메모 업데이트(처음 생성 아닌 경우)
+        else {
+            return res.status(200).json({ "message": "memo updated successfully", data: memoInfo });
+        }
     })
-
-
 }
 
 export const showMemos = (req, res) => { //메모 조회

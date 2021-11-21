@@ -15,7 +15,10 @@ import { isLoggedin } from "../Services/AuthService";
 
 const router = express.Router();
 
-router.put("/createMemo", isLoggedin, createMemo);
+// router.put("/createMemo", isLoggedin, createMemo);
+router.put("/createMemo", createMemo);
+
+
 router.post("/delete", isLoggedin, deleteMemo);
 router.post("/save", isLoggedin, saveMemo);
 router.post("/addbookmark", isLoggedin, addBookmark);
