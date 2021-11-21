@@ -8,14 +8,11 @@ import { v4 } from 'uuid';
 
 // async await        
 let roomsStatus = {}
-
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
-
     // test용 유저 그냥 해봄
     // const _id = "61979faae63242a5ac10edb9";
-
     // 2. 빈 메모 생성해서 DB에 넣어주기
     // const newMemo = {
     //     ID: v4(),
@@ -23,7 +20,6 @@ export const createMemo = (req, res) => {
     //     content: "",
     //    
     // }
-
     //유저 생성 test용
     // User.create({email: "seo@test.com"}, (err, user) => {
     //     if(err) {
@@ -31,11 +27,14 @@ export const createMemo = (req, res) => {
     //     }
     //     console.log(user);
     // })
+    let checkUser = req.user;
+
+
     let IsQuit = req.body.quit;
     let checkUser = req.user;
+
+
     // 업데이트 전에 userList 체크 해주기 위해
-
-
     Memo.findOne({ _id: req.body._id }, (err, memoInfo) => {
         if (err) {
             console.log("error find ID");
@@ -43,11 +42,10 @@ export const createMemo = (req, res) => {
             return res.status(400).json({ "message": "err.message" });
         }
         const _userList = memoInfo?.userList;
-
-
         if (_userList) {
             checkUser = _userList;
         }
+
 
         if (IsQuit) {
             let val = roomsStatus[memoInfo._id]
@@ -60,7 +58,6 @@ export const createMemo = (req, res) => {
             }
         }
 
-        console.log("current room status memoContorller 64: ", roomsStatus)
         Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
             if (err) {
                 console.log("err at createMemo");
@@ -70,47 +67,33 @@ export const createMemo = (req, res) => {
             if (memoInfo) {
                 // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
                 const memoId = memoInfo._id;
-
                 // memoList map을 가져온 뒤 수정 --> 다시 저장
-
                 User.findOne({ _id: _id }, async (err, user) => {
                     if (err) {
                         console.log(err);
                         return res.status(400).json({ "message": "no such id" })
                     }
-
                     let memoList = user.memoList;
                     let folderList = user.folderList;
-
                     if (!memoList) { // memoList 없는 경우(undefined)
                         memoList = new Map();
                     }
-
                     if (!folderList) { // folderList 없는 경우(undefined)
                         folderList = new Map();
                         folderList.set("DEFAULT", []);
                         folderList.set("BOOKMARK", []);
                     }
-
                     memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
                     folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
-
                     // const newFolderList = folderList.get("DEFAULT")
                     // newFolderList.push(memoId);
-
                     // User DB에 변경사항 다시 저장
                     await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
                 });
-
-                return res.status(200).json({ "message": "memo created successfully", data: memoInfo, roomsStatus });
+                return res.status(200).json({ "message": "memo created successfully", data: memoInfo });
             }
-
-
         })
-
     })
-
-
 }
 
 export const showMemos = (req, res) => { //메모 조회
@@ -184,7 +167,6 @@ export const viewMemo = (req, res) => {
     // 받은 id로 해당 메모 찾는다
     // const userId = "6197a5dfb2cdee4640e169cc" 
     // const memoId = "test" 
-
 
     const userId = req.user._id;
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
@@ -423,8 +405,10 @@ export const removeBookmark = (req, res) => {
 };
 
 export const addUser = async (req, res) => {
-    const userEmail = req.body.userEmail
-    const memoId = req.body.memoId
+    const userEmail = req.body.userEmail;
+    const memoId = req.body.memoId;
+    // 메모를 만든 유저 아이디
+    const _userId = req.user;
 
     //test용
     // const userEmail = "test@test.com";
@@ -474,8 +458,17 @@ export const addUser = async (req, res) => {
                 console.log(err);
                 return res.status(400).json({ "message": "no such memo" })
             }
-            let userList = memo.userList;
-            userList.push(userId);
+            let userList = memo?.userList;
+
+
+            if (userList) {
+                userList.push(userId);
+
+            }
+            else {
+                userList = [_userId._id];
+                userList.push(userId);
+            }
 
             // db에 업데이트 해주기
             await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });

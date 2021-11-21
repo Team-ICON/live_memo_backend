@@ -7,6 +7,7 @@ const pushSchema = new mongoose.Schema({
     ],
     body: String,
     pushTime: { type: Date, default: Date.now() },
+    memoId: String,
 })
 
 const model = mongoose.model('Push', pushSchema);
