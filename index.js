@@ -15,9 +15,43 @@ import folderRouter from "./src/Router/folderRouter";
 dotenv.config();
 import "./src/db";
 
+// // https ver1
+// const https = require('https');
+// const fs = require('fs');
+// const options = {
+//   key: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/privkey.pem'), //(개인키 지정/)
+//   cert: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/cert.pem'), //(서버인증서 지정)
+//   ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'), //(루트체인 지정) 
+//   minVersion: "TLSv1.2" //(서버 환경에 따라 선택적 적용) 
+// };
+
+// https.createServer(options, (req, res) => {
+//   res.writeHead(200);
+//   res.end('hello SecureSign\n');
+// }).listen(5000);
+
+
+// // https ver2
+// const https = require('https');
+// const fs = require('fs');
+// // Create an HTTP service.
+// http.createServer(app).listen(3000);
+
+// const options = {
+//   ca: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/fullchain.pem'),
+//   key: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/privkey.pem'),
+//   cert: fs.readFileSync('/etc/letsencrypt/live/seoproject.shop/cert.pem')
+// };
+// // Create an HTTPS service identical to the HTTP service.
+// https.createServer(options, app).listen(5000);
+///////////////////////////////////////////////
+
 const app = express();
 const PORT = process.env.PORT || 33333;
 const session = require('express-session');	//세션관리용 미들웨어
+const server = require("http").createServer(app);
+
+
 
 app.use(session({
   httpOnly: true,	//자바스크립트를 통해 세션 쿠키를 사용할 수 없도록 함
@@ -31,11 +65,20 @@ app.use(session({
   }
 }));
 
+
+
 // app.all('/*', function(req, res, next) {
 //     console.log("/* executed");
 //     res.header("Access-Control-Allow-Origin", "*");
 //     next();
 // });
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 
 
 /* 미들웨어 */
@@ -59,6 +102,22 @@ app.use('/api/user', userRouter);
 app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
 
+//음성 webrtc
+io.on("connection", (socket) => {
+  socket.emit("me", socket.id);
+
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded")
+  });
+
+  socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+    io.to(userToCall).emit("callUser", { signal: signalData, from, name });
+  });
+
+  socket.on("answerCall", (data) => {
+    io.to(data.to).emit("callAccepted", data.signal)
+  });
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);

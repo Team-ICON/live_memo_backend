@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 
 const memoSchema = new mongoose.Schema({
     _id: String,
-    // roomId: String,
+    title: String,
     content: String,
     createTime: { type: Date, default: Date.now() },
     updateTime: { type: Date, default: Date.now() },
     userList: [String],
+
 })
 
 const model = mongoose.model('Memo', memoSchema);
