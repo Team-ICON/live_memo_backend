@@ -6,7 +6,6 @@ import { v4 } from 'uuid';
 
 // import { moveFolderUtil } from "../utils";
 
-// async await        
 let roomsStatus = {}
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
@@ -17,7 +16,6 @@ export const createMemo = (req, res) => {
     // const memoId = "final";
     // const memoContent ="final"
 
-    // 수정전 
     Memo.findOneAndUpdate({ _id: req.body._id, }, { title: req.body.title, content: req.body.body, updateTime: Date.now() }, { new: true, upsert: true }, async (err, memoInfo) => {
 
         if (err) {
@@ -25,12 +23,8 @@ export const createMemo = (req, res) => {
             console.error(err);
             return res.status(400).json({ "message": "err.message" });
         }
-        const _userList = memoInfo?.userList;
-        if (_userList) {
-            checkUser = _userList;
-        }
+        
         let IsQuit = req.body.quit;
-        let checkUser = req.user;
 
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
@@ -84,42 +78,6 @@ export const createMemo = (req, res) => {
         else {
             return res.status(200).json({ "message": "memo updated successfully", data: memoInfo });
         }
-        console.log(roomsStatus)
-        Memo.findOneAndUpdate({ _id: req.body._id, }, { content: req.body.body, userList: checkUser }, { new: true, upsert: true }, (err, memoInfo) => {
-            if (err) {
-                console.log("err at createMemo");
-                console.error(err);
-                return res.status(400).json({ "message": "err.message" });
-            }
-            if (memoInfo) {
-                // 3. 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
-                const memoId = memoInfo._id;
-                // memoList map을 가져온 뒤 수정 --> 다시 저장
-                User.findOne({ _id: _id }, async (err, user) => {
-                    if (err) {
-                        console.log(err);
-                        return res.status(400).json({ "message": "no such id" })
-                    }
-                    let memoList = user.memoList;
-                    let folderList = user.folderList;
-                    if (!memoList) { // memoList 없는 경우(undefined)
-                        memoList = new Map();
-                    }
-                    if (!folderList) { // folderList 없는 경우(undefined)
-                        folderList = new Map();
-                        folderList.set("DEFAULT", []);
-                        folderList.set("BOOKMARK", []);
-                    }
-                    memoList.set(memoId, "DEFAULT");   // {생성된 메모id: "디폴트"}
-                    folderList.get("DEFAULT").push(memoId);   // {생성된 메모id: "디폴트"}
-                    // const newFolderList = folderList.get("DEFAULT")
-                    // newFolderList.push(memoId);
-                    // User DB에 변경사항 다시 저장
-                    await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList })
-                });
-                return res.status(200).json({ "message": "memo created successfully", data: memoInfo, roomsStatus });
-            }
-        })
     })
 
 }
@@ -192,10 +150,6 @@ export const showMemos = (req, res) => { //메모 조회
 
 export const viewMemo = (req, res) => {
 
-    // 받은 id로 해당 메모 찾는다
-    // const userId = "6197a5dfb2cdee4640e169cc" 
-    // const memoId = "test" 
-
     const userId = req.user._id;
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
         if (err) {
@@ -260,16 +214,13 @@ export const viewMemo = (req, res) => {
 }
 
 
-
-
-
 //이거는 나중에 시그널링 되고 다시 봐야할듯
 export const saveMemo = (req, res) => {
     // 1. memo id, content 받아오기
-    // const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
-    // const { memoId } = req.body;    // test용
-    const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
-    const body = "please";
+    const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
+    const { memoId } = req.body;    // test용
+    // const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
+    // const body = "please";
 
     // 2. db에서 해당 메모 찾기
     Memo.findOneAndUpdate({ _id: memoId }, { updateTime: Date.now(), body: body }, (err, modified) => {
