@@ -46,9 +46,9 @@ export const signToken = async (req, res) => {
             return res.sendStatus(500);
         } else {
             try {
-                res.cookie('livememo-token', token, { httpOnly:false, secure: false });
+                // res.cookie('livememo-token', token, { httpOnly:false, secure: false });
                 console.log('token json send');
-                res.redirect(`https://livememo-frontend.web.app`);
+                res.redirect(`https://livememo-frontend.web.app/${token}`);
                 // return res.status(200).json({ token });
                 // req.session.livememo = token;
                 // res.cookie('livememo-token', token);
