@@ -38,6 +38,7 @@ export const createMemo = (req, res) => {
             }
         }
 
+        console.log("current Room status memocontroller 41", roomsStatus)
         if (req.body.first) {
             // 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
             const memoId = memoInfo._id;
@@ -138,7 +139,7 @@ export const showMemos = (req, res) => { //메모 조회
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
 
-                    console.log(result);
+
                     return res.status(200).json({ success: true, memos: result });
                 }
             })
@@ -170,7 +171,7 @@ export const viewMemo = (req, res) => {
             roomsStatus[memo._id] = curMem + 1
 
 
-        console.log("current Room status memocontroller 210", roomsStatus)
+        console.log("current Room status memocontroller 174", roomsStatus)
 
         const userIdList = memo.userList || [];
         const newUserIdList = [];
@@ -311,9 +312,7 @@ export const addBookmark = async (req, res) => {
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
         // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
         if (!memoList.has(memoId) || !folderList.has(afterFolderName)) {
-            console.log("!memoList.has(memoId)", !memoList.has(memoId))
-            console.log("!folderList.has(afterFolderName)", !folderList.has(afterFolderName))
-            console.log("cannot find memo/folder");
+
             return res.status(400).json({ "message": "cannot find memo/folder" })
         }
 
@@ -393,6 +392,29 @@ export const removeBookmark = (req, res) => {
     });
 
 };
+export const getCurUser = async (req, res) => {
+    const userEmail = req.body.userEmail;
+    console.log("399:", userEmail);
+    User.findOne({ email: userEmail }, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "cannot find this email" })
+        }
+
+        if (!user) {
+            console.log("no such user!");
+            return res.status(400).json({ "message": "cannot find this email" });
+        }
+        // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
+        const email = user.email || ""
+        const profileName = user.profileName || "";
+        const picture = user.picture || "";
+
+
+        return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "email": email, "profileName": profileName, "picture": picture } });
+
+    });
+}
 
 export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail;
