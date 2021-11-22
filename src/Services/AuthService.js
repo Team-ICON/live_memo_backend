@@ -46,9 +46,9 @@ export const signToken = async (req, res) => {
             return res.sendStatus(500);
         } else {
             try {
-                console.log('token json send');
                 res.cookie('livememo-token', token);
-                res.redirect(`https://live-memo-610d4.firebaseapp.com`);
+                console.log('token json send');
+                res.redirect(`https://livememo-frontend.web.app`);
                 // return res.status(200).json({ token });
                 // req.session.livememo = token;
                 // res.cookie('livememo-token', token);
