@@ -9,6 +9,7 @@ import {
     removeBookmark,
     viewMemo,
     addUser,
+    getUserListOfMemo
 } from "../Controller/memoController";
 
 import { isLoggedin } from "../Services/AuthService";
@@ -24,6 +25,7 @@ router.post("/addUser", isLoggedin, addUser);
 
 router.get("/getMemos", isLoggedin, showMemos); // main에 메모리스트 전체 뜨는 것
 router.get("/getMemo/:id", isLoggedin, viewMemo); // 하나의 메모 조회
+router.get("/getUserListOfMemo/:id", isLoggedin, getUserListOfMemo);
 
 // router.put("/createMemo", createMemo);
 

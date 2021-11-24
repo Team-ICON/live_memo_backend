@@ -149,7 +149,6 @@ export const showMemos = (req, res) => { //메모 조회
 }
 
 export const viewMemo = (req, res) => {
-
     const userId = req.user._id;
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
         if (err) {
@@ -467,4 +466,62 @@ export const addUser = async (req, res) => {
             return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "profileName": profileName, "picture": picture } });
         });
     });
+}
+
+export const getUserListOfMemo = (req, res) => {
+    const userId = req.user._id;
+    Memo.findOne({ "_id": req.params.id }, (err, memo) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "err at viewMemo" });
+        }
+
+        if (!memo) {
+            console.log("no such memo!");
+            return res.status(400).json({ "message": "no such memo!" });
+        }
+        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
+
+        let curMem = roomsStatus[memo._id]
+        if (curMem === undefined)
+            roomsStatus[memo._id] = 1
+        else
+            roomsStatus[memo._id] = curMem + 1
+
+
+        console.log("current Room status memocontroller 210", roomsStatus)
+
+        const userIdList = memo.userList || [];
+        const newUserIdList = [];
+        const userProfileNameList = [];
+        const userPictureList = [];
+        const newUserObjectList = [];
+
+        User.find({
+            _id: { $in: userIdList }
+        }, function (err, users) {
+            users.forEach(user => {
+                newUserIdList.push(user._id);
+                userProfileNameList.push(user.profileName);
+                userPictureList.push(user.picture);
+            });
+
+
+            for (let i = 0; i < userIdList.length; i++) {
+                if (newUserIdList[i] === userId) {
+                    continue;
+                }
+                newUserObjectList.push({
+                    "_id": newUserIdList[i] || "",
+                    "profileName": userProfileNameList[i] || "",
+                    "picture": userPictureList[i] || ""
+                })
+            }
+
+            let clonedMemo = JSON.parse(JSON.stringify(memo))
+            clonedMemo.userList = newUserObjectList;
+
+            return res.status(200).json({ success: true, newUserObjectList });
+        });
+    })
 }
