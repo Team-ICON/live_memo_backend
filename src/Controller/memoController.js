@@ -117,6 +117,7 @@ export const showMemos = (req, res) => { //메모 조회
                     records.forEach((element) => {
                         let temp = new Object();
                         temp._id = element._id;
+                        temp.title = element.title;
                         temp.content = element.content;
                         temp.updateTime = element.updateTime;
                         temp.howManyShare = element.userList.length;
