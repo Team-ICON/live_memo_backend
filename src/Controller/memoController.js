@@ -23,21 +23,19 @@ export const createMemo = (req, res) => {
             console.error(err);
             return res.status(400).json({ "message": "err.message" });
         }
-        
+
         let IsQuit = req.body.quit;
 
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
-            let val = roomsStatus[memoInfo._id]
-
-            if (val === undefined) {
-                roomsStatus[memoInfo._id] = 0
-            }
-            else {
-                roomsStatus[memoInfo._id] = (val - 1 < 0 ? 0 : val - 1)
-            }
+            let curMem = roomsStatus[memoInfo._id]
+            if (curMem === undefined)
+                roomsStatus[memoInfo.id] = []
+            else
+                roomsStatus[memoInfo._id].pop(req.user)
         }
 
+        console.log("current Room status memocontroller 41", roomsStatus)
         if (req.body.first) {
             // 방금 생성된 메모 id를 해당 유저 DB의 memoList에 추가해주기
             const memoId = memoInfo._id;
@@ -138,7 +136,7 @@ export const showMemos = (req, res) => { //메모 조회
                         return a.bookmarked > b.bookmarked ? -1 : 1;
                     })
 
-                    console.log(result);
+
                     return res.status(200).json({ success: true, memos: result });
                 }
             })
@@ -149,7 +147,6 @@ export const showMemos = (req, res) => { //메모 조회
 }
 
 export const viewMemo = (req, res) => {
-
     const userId = req.user._id;
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
         if (err) {
@@ -165,12 +162,12 @@ export const viewMemo = (req, res) => {
 
         let curMem = roomsStatus[memo._id]
         if (curMem === undefined)
-            roomsStatus[memo._id] = 1
+            roomsStatus[memo._id] = [req.user]
         else
-            roomsStatus[memo._id] = curMem + 1
+            roomsStatus[memo._id].push(req.user)
 
 
-        console.log("current Room status memocontroller 210", roomsStatus)
+        console.log("current Room status memocontroller 174", roomsStatus)
 
         const userIdList = memo.userList || [];
         const newUserIdList = [];
@@ -311,9 +308,7 @@ export const addBookmark = async (req, res) => {
         // 받아온 메모의 폴더가 beforeFolderName과 일치하는지 확인 필요
         // 이동하려는 폴더명이 폴더리스트에 없는 경우 에러 처리
         if (!memoList.has(memoId) || !folderList.has(afterFolderName)) {
-            console.log("!memoList.has(memoId)", !memoList.has(memoId))
-            console.log("!folderList.has(afterFolderName)", !folderList.has(afterFolderName))
-            console.log("cannot find memo/folder");
+
             return res.status(400).json({ "message": "cannot find memo/folder" })
         }
 
@@ -393,6 +388,35 @@ export const removeBookmark = (req, res) => {
     });
 
 };
+export const afterCurUser = async (req, res) => {
+    const roomId = req.body.roomId;
+
+    return res.status(200).json({ success: true, "message": "add user successfully", "userdata": roomsStatus[roomId] });
+
+
+}
+export const getCurUser = async (req, res) => {
+    const userEmail = req.body.userEmail;
+    User.findOne({ email: userEmail }, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "cannot find this email" })
+        }
+
+        if (!user) {
+            console.log("no such user!");
+            return res.status(400).json({ "message": "cannot find this email" });
+        }
+        // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
+        const email = user.email || ""
+        const profileName = user.profileName || "";
+        const picture = user.picture || "";
+
+
+        return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "email": email, "profileName": profileName, "picture": picture } });
+
+    });
+}
 
 export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail;
@@ -467,4 +491,62 @@ export const addUser = async (req, res) => {
             return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "profileName": profileName, "picture": picture } });
         });
     });
+}
+
+export const getUserListOfMemo = (req, res) => {
+    const userId = req.user._id;
+    Memo.findOne({ "_id": req.params.id }, (err, memo) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "err at viewMemo" });
+        }
+
+        if (!memo) {
+            console.log("no such memo!");
+            return res.status(400).json({ "message": "no such memo!" });
+        }
+        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
+
+        let curMem = roomsStatus[memo._id]
+        if (curMem === undefined)
+            roomsStatus[memo._id] = 1
+        else
+            roomsStatus[memo._id] = curMem + 1
+
+
+        console.log("current Room status memocontroller 210", roomsStatus)
+
+        const userIdList = memo.userList || [];
+        const newUserIdList = [];
+        const userProfileNameList = [];
+        const userPictureList = [];
+        const newUserObjectList = [];
+
+        User.find({
+            _id: { $in: userIdList }
+        }, function (err, users) {
+            users.forEach(user => {
+                newUserIdList.push(user._id);
+                userProfileNameList.push(user.profileName);
+                userPictureList.push(user.picture);
+            });
+
+
+            for (let i = 0; i < userIdList.length; i++) {
+                if (newUserIdList[i] === userId) {
+                    continue;
+                }
+                newUserObjectList.push({
+                    "_id": newUserIdList[i] || "",
+                    "profileName": userProfileNameList[i] || "",
+                    "picture": userPictureList[i] || ""
+                })
+            }
+
+            let clonedMemo = JSON.parse(JSON.stringify(memo))
+            clonedMemo.userList = newUserObjectList;
+
+            return res.status(200).json({ success: true, newUserObjectList });
+        });
+    })
 }
