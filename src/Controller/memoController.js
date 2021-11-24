@@ -468,3 +468,22 @@ export const addUser = async (req, res) => {
         });
     });
 }
+
+export const getCurUser = async (req, res) => {
+    const userEmail = req.body.userEmail;
+    User.findOne({ email: userEmail }, async (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "cannot find this email" })
+        }
+        if (!user) {
+            console.log("no such user!");
+            return res.status(400).json({ "message": "cannot find this email" });
+        }
+        // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
+        const email = user.email || ""
+        const profileName = user.profileName || "";
+        const picture = user.picture || "";
+        return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "email": email, "profileName": profileName, "picture": picture } });
+    });
+}
