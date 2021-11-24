@@ -268,6 +268,10 @@ export const deleteMemo = (req, res) => {
         ////////////////////////////////////////////////////////////////////////
         // 메모 데이터
         Memo.findOne({ _id: memoId }, async (err, memo) => {
+            if (!memo) {
+                console.log("no memo, maybe already deleted!");
+                return res.status(400).json({ "message": "no memo, maybe already deleted!" });
+            }
             // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
             let userList = memo.userList;
             userList = userList.filter(item => item !== _id);
@@ -283,8 +287,8 @@ export const deleteMemo = (req, res) => {
             // 3) 변경사항  DB에 저장
             await Memo.findOneAndUpdate({ _id: memoId }, { userList: userList });
             await User.findOneAndUpdate({ _id: _id }, { memoList: memoList, folderList: folderList });
+            return res.status(200).json({ "message": "memo deleted successfully" });
         })
-        return res.status(200).json({ "message": "memo deleted successfully" });
     })
 }
 
