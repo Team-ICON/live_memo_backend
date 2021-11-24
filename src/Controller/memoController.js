@@ -122,9 +122,12 @@ export const showMemos = (req, res) => { //메모 조회
                         temp.howManyShare = element.userList.length;
 
                         if (bookmarkList.includes(element._id)) {
-                            temp.bookmarked = "true";
+
+                            temp.bookmarked = true;
                         } else {
-                            temp.bookmarked = "false";
+
+
+                            temp.bookmarked = false;
                         }
                         result.push(temp);
                     });
@@ -294,7 +297,6 @@ export const addBookmark = async (req, res) => {
     const memoId = req.body.memoId
     const afterFolderName = "BOOKMARK";
 
-
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
@@ -330,17 +332,17 @@ export const addBookmark = async (req, res) => {
         // DB에 {memoList: memoList, folderList: folderList} 반영
         folderList.set(beforeFolderName, beforeFolderList);
         folderList.set(afterFolderName, afterFolderList);
-        await User.findOneAndUpdate({ ID: userId }, { memoList: memoList, folderList: folderList });
+        await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
         return res.status(200).json({ "message": "moved successfully" });
 
     });
 };
 
 export const removeBookmark = (req, res) => {
-    const userId = "618e50689f7b6b438695fc2c";
-    const memoId = "9db12b21-51cc-4cd9-b067-a946a8ef811e";
-    const afterFolderName = "DEFAULT";
 
+    const userId = req.user._id
+    const memoId = req.body.memoId
+    const afterFolderName = "DEFAULT";
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
@@ -382,7 +384,7 @@ export const removeBookmark = (req, res) => {
         // DB에 {memoList: memoList, folderList: folderList} 반영
         folderList.set(beforeFolderName, beforeFolderList);
         folderList.set(afterFolderName, afterFolderList);
-        await User.findOneAndUpdate({ ID: userId }, { memoList: memoList, folderList: folderList });
+        await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
         return res.status(200).json({ "message": "moved successfully" });
 
     });
