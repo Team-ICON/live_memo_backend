@@ -28,14 +28,9 @@ export const createMemo = (req, res) => {
 
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
-            let val = roomsStatus[memoInfo._id]
 
-            if (val === undefined) {
-                roomsStatus[memoInfo._id] = 0
-            }
-            else {
-                roomsStatus[memoInfo._id] = (val - 1 < 0 ? 0 : val - 1)
-            }
+
+            roomsStatus[memoInfo._id].pop(req.user)
         }
 
         console.log("current Room status memocontroller 41", roomsStatus)
@@ -166,9 +161,9 @@ export const viewMemo = (req, res) => {
 
         let curMem = roomsStatus[memo._id]
         if (curMem === undefined)
-            roomsStatus[memo._id] = 1
+            roomsStatus[memo._id] = [req.user]
         else
-            roomsStatus[memo._id] = curMem + 1
+            roomsStatus[memo._id].push(req.user)
 
 
         console.log("current Room status memocontroller 174", roomsStatus)
@@ -392,9 +387,15 @@ export const removeBookmark = (req, res) => {
     });
 
 };
+export const afterCurUser = async (req, res) => {
+    const roomId = req.body.roomId;
+
+    return res.status(200).json({ success: true, "message": "add user successfully", "userdata": roomsStatus[roomId] });
+
+
+}
 export const getCurUser = async (req, res) => {
     const userEmail = req.body.userEmail;
-    console.log("399:", userEmail);
     User.findOne({ email: userEmail }, async (err, user) => {
         if (err) {
             console.log(err);
