@@ -9,12 +9,10 @@ import {
     removeBookmark,
     viewMemo,
     addUser,
-<<<<<<< HEAD
     getCurUser,
-    afterCurUser
-=======
+    afterCurUser,
     getUserListOfMemo
->>>>>>> 2663833e639533e3da59908e96f7909ed610d348
+
 } from "../Controller/memoController";
 
 import { isLoggedin } from "../Services/AuthService";
