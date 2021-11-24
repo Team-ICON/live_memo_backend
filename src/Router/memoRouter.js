@@ -12,7 +12,6 @@ import {
     getCurUser,
     afterCurUser,
     getUserListOfMemo
-
 } from "../Controller/memoController";
 
 import { isLoggedin } from "../Services/AuthService";
