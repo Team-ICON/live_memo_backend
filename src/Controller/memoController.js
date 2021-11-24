@@ -28,9 +28,11 @@ export const createMemo = (req, res) => {
 
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
-
-
-            roomsStatus[memoInfo._id].pop(req.user)
+            let curMem = roomsStatus[memoInfo._id]
+            if (curMem === undefined)
+                roomsStatus[memoInfo.id] = []
+            else
+                roomsStatus[memoInfo._id].pop(req.user)
         }
 
         console.log("current Room status memocontroller 41", roomsStatus)
