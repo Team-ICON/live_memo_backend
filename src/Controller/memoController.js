@@ -548,5 +548,4 @@ export const getUserListOfMemo = (req, res) => {
             return res.status(200).json({ success: true, newUserObjectList });
         });
     })
->>>>>>> 054ae12f0e8e2dda624ba7ffa362f0d4e3bd9992
 }
