@@ -126,8 +126,6 @@ export const showMemos = (req, res) => { //메모 조회
 
                             temp.bookmarked = true;
                         } else {
-
-
                             temp.bookmarked = false;
                         }
                         result.push(temp);
