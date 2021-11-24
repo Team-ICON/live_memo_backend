@@ -11,6 +11,8 @@ const cookieParser = require("cookie-parser");
 import memoRouter from "./src/Router/memoRouter";
 import userRouter from "./src/Router/userRouter";
 import folderRouter from "./src/Router/folderRouter";
+import pushRouter from "./src/Router/pushRouter";
+
 
 dotenv.config();
 import "./src/db";
@@ -61,23 +63,8 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRouter);
 app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
+app.use('/api/push', pushRouter);
 
-//음성 webrtc
-io.on("connection", (socket) => {
-  socket.emit("me", socket.id);
-
-  socket.on("disconnect", () => {
-    socket.broadcast.emit("callEnded")
-  });
-
-  socket.on("callUser", ({ userToCall, signalData, from, name }) => {
-    io.to(userToCall).emit("callUser", { signal: signalData, from, name });
-  });
-
-  socket.on("answerCall", (data) => {
-    io.to(data.to).emit("callAccepted", data.signal)
-  });
-});
 
 app.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
