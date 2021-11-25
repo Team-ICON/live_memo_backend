@@ -41,18 +41,24 @@ passport.use(
 // Issue Token
 export const signToken = async (req, res) => {
     console.log(`req.user`, req.user);
-    jwt.sign({ email: req.user.email, picture: req.user.picture, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '30 day' }, (err, token) => {
+    jwt.sign({ email: req.user.email, picture: req.user.picture, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '30 days' }, (err, token) => {
         if (err) {
             return res.sendStatus(500);
         } else {
             try {
                 console.log('token json send');
 <<<<<<< HEAD
+<<<<<<< HEAD
                 res.redirect(`https://livememo-frontend.web.app/${token}`);
 =======
                 res.cookie('livememo-token', token);
                 res.redirect(`http://localhost:3000`);
 >>>>>>> 0d00d8abbeb9c636fbc99af852982f2ba7822ed2
+=======
+                // res.cookie('livememo-token', token);
+                // res.redirect(`https://live-memo-610d4.firebaseapp.com/`);
+                res.redirect(`http://localhost:3000/token/${token}`);
+>>>>>>> jb
                 // return res.status(200).json({ token });
                 // req.session.livememo = token;
                 // res.cookie('livememo-token', token);

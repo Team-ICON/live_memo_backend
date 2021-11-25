@@ -31,3 +31,7 @@ export const createPush = (req, res) => {
         return res.status(200).json({ success: true, folders: folderList });
     });
 }
+
+export const testPush = (req, res) => {
+    
+}
