@@ -29,8 +29,8 @@ export const createMemo = (req, res) => {
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
             let curMem = roomsStatus[memoInfo._id]
-            if (curMem === undefined)
-                roomsStatus[memoInfo.id] = []
+            if (curMem === undefined && req.body.first)
+                roomsStatus[memoInfo._id] = [req.user]
             else
                 roomsStatus[memoInfo._id].pop(req.user)
         }
@@ -41,7 +41,8 @@ export const createMemo = (req, res) => {
             const memoId = memoInfo._id;
 
             // 생성된 메모의 userList에 userId 넣어주기
-            await Memo.findOneAndUpdate({ _id: memoId }, { userList: [_id] })
+            console.log("i find it ", memoInfo.userList)
+            await Memo.findOneAndUpdate({ _id: memoId }, { userList: Array.from(new Set([...memoInfo.userList, _id])) })
 
             User.findOne({ _id: _id }, async (err, user) => {
                 if (err) {
@@ -148,6 +149,8 @@ export const showMemos = (req, res) => { //메모 조회
     })
 }
 
+
+
 export const viewMemo = (req, res) => {
     const userId = req.user._id;
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
@@ -165,8 +168,10 @@ export const viewMemo = (req, res) => {
         let curMem = roomsStatus[memo._id]
         if (curMem === undefined)
             roomsStatus[memo._id] = [req.user]
-        else
+        else {
+            console.log(roomsStatus)
             roomsStatus[memo._id].push(req.user)
+        }
 
 
         console.log("current Room status memocontroller 174", roomsStatus)
@@ -237,13 +242,13 @@ export const deleteMemo = (req, res) => {
     const { _id } = req.user; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
     const { memoId } = req.body;
     // test용 유저 그냥 해봄
-    console.log(_id, memoId);
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터
     // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거
-    let curMem = roomsStatus[memoId]
 
-    roomsStatus[memoId] = curMem - 1
+    roomsStatus[memoId].pop(_id)
+    if (roomsStatus[memoId].length === 0)
+        delete roomsStatus[memoId]
 
     console.log("current Room status memocontroller 269", roomsStatus)
     User.findOne({ _id: _id }, async (err, user) => {
@@ -393,35 +398,35 @@ export const removeBookmark = (req, res) => {
     });
 
 };
-export const afterCurUser = async (req, res) => {
-    const roomId = req.body.roomId;
+// export const afterCurUser = async (req, res) => {
+//     const roomId = req.body.roomId;
 
-    return res.status(200).json({ success: true, "message": "add user successfully", "userdata": roomsStatus[roomId] });
-
-
-}
-export const getCurUser = async (req, res) => {
-    const userEmail = req.body.userEmail;
-    User.findOne({ email: userEmail }, async (err, user) => {
-        if (err) {
-            console.log(err);
-            return res.status(400).json({ "message": "cannot find this email" })
-        }
-
-        if (!user) {
-            console.log("no such user!");
-            return res.status(400).json({ "message": "cannot find this email" });
-        }
-        // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
-        const email = user.email || ""
-        const profileName = user.profileName || "";
-        const picture = user.picture || "";
+//     return res.status(200).json({ success: true, "message": "add user successfully", "userdata": roomsStatus[roomId] });
 
 
-        return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "email": email, "profileName": profileName, "picture": picture } });
+// }
+// export const getCurUser = async (req, res) => {
+//     const userEmail = req.body.userEmail;
+//     User.findOne({ email: userEmail }, async (err, user) => {
+//         if (err) {
+//             console.log(err);
+//             return res.status(400).json({ "message": "cannot find this email" })
+//         }
 
-    });
-}
+//         if (!user) {
+//             console.log("no such user!");
+//             return res.status(400).json({ "message": "cannot find this email" });
+//         }
+//         // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
+//         const email = user.email || ""
+//         const profileName = user.profileName || "";
+//         const picture = user.picture || "";
+
+
+//         return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "email": email, "profileName": profileName, "picture": picture } });
+
+//     });
+// }
 
 export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail;

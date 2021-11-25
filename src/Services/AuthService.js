@@ -40,15 +40,16 @@ passport.use(
 
 // Issue Token
 export const signToken = async (req, res) => {
-    console.log(`req.user`, req.user);
-    jwt.sign({ email: req.user.email, picture: req.user.picture, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '30 day' }, (err, token) => {
+    // console.log(`req.user`, req.user);
+    jwt.sign({ email: req.user.email, picture: req.user.picture, profileName: req.user.profileName, _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '30 days' }, (err, token) => {
         if (err) {
             return res.sendStatus(500);
         } else {
             try {
                 console.log('token json send');
-                res.cookie('livememo-token', token);
-                res.redirect(`http://localhost:3000`);
+                // res.cookie('livememo-token', token);
+                // res.redirect(`https://live-memo-610d4.firebaseapp.com/`);
+                res.redirect(`http://localhost:3000/token/${token}`);
                 // return res.status(200).json({ token });
                 // req.session.livememo = token;
                 // res.cookie('livememo-token', token);
@@ -63,12 +64,15 @@ export const signToken = async (req, res) => {
     });
 }
 
+
 export const isLoggedin = async (req, res, next) => {
+
     try {
         // client에서 request header에 authorization항목에 토큰 넣어준다고 가정했습니다
         if (req.headers.authorization) {
             let token = req.headers.authorization.split(" ")[1];
-            const userInfoToken = await jwt.verify(token, process.env.JWT_SECRET);
+            // const userInfoToken = await jwt.verify(token, process.env.JWT_SECRET);
+            const userInfoToken = await jwt.decode(token);
 
             // 토큰이 유효하지 않은 경우
             if (!userInfoToken) {
@@ -77,6 +81,7 @@ export const isLoggedin = async (req, res, next) => {
 
             // req.user항목에 토큰에서 해독한 유저 정보를 넣어서 넘깁니다
             req.user = userInfoToken;
+            next();
         } else {
             return res.status(400).json({ "message": "Need to Login for this content" })
         }
@@ -85,5 +90,5 @@ export const isLoggedin = async (req, res, next) => {
         console.log("err at Middleware");
         return res.status(400).json({ "message": "Login Error at middlewares" });
     }
-    next();
+
 }
