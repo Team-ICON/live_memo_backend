@@ -1,4 +1,3 @@
-import express from "express";
 import dotenv from "dotenv";
 import Ydoc from "./src/model/memo";
 import cors from "cors";
@@ -17,10 +16,15 @@ import pushRouter from "./src/Router/pushRouter";
 dotenv.config();
 import "./src/db";
 
-const app = express();
-const PORT = process.env.PORT || 4000;
-const session = require('express-session');	//세션관리용 미들웨어
+const app = require("express")();
 const server = require("http").createServer(app);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+const session = require('express-session');	//세션관리용 미들웨어
 
 app.use(session({
   httpOnly: true,	//자바스크립트를 통해 세션 쿠키를 사용할 수 없도록 함
@@ -56,7 +60,19 @@ app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
 app.use('/api/push', pushRouter);
 
-app.listen(process.env.PORT, () => {
+
+io.on('connection', function (socket) {
+  console.log('a user connected');
+
+
+  socket.on('newUser', ((msg) => {
+    socket.broadcast.emit('newUser', msg)
+  }))
+
+});
+
+
+server.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
 })
 
