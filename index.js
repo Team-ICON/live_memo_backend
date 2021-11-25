@@ -13,10 +13,6 @@ import memoRouter from "./src/Router/memoRouter";
 import userRouter from "./src/Router/userRouter";
 import folderRouter from "./src/Router/folderRouter";
 import pushRouter from "./src/Router/pushRouter";
-<<<<<<< HEAD
-
-=======
->>>>>>> jb
 
 dotenv.config();
 import "./src/db";
@@ -37,33 +33,6 @@ app.use(session({
     Secure: true
   }
 }));
-
-const appPush = async () => {
-    try {
-        // VAPID keys should be generated only once.
-        const vapidKeys = webpush.generateVAPIDKeys();
-        webpush.setGCMAPIKey('BEQA-GyE9tre2RN7z0CWpDpTU3q0sf-7xXZthInZhHfyNO0tg_tJEYy2mZMpPXTBl2749U7lZS9z36fhwA0UEmA');
-        webpush.setVapidDetails(
-            'mailto:example@yourdomain.org',
-            vapidKeys.publicKey,
-            vapidKeys.privateKey
-        );
-        // This is the same output of calling JSON.stringify on a PushSubscription
-        const pushSubscription = {
-          endpoint: "https://fcm.googleapis.com/fcm/send/ecGDRJwosX8:APA91bER7PvGoOMe_aPvW-YimO9JtdzhJYNoNzcQqHtnBL4ZO7MwZ0CRh7T0Vapi_KICV2SwxCSHK-oXSc07iJsz-4uCdpcYnCO0bsy4wJw-kPA9yGCfoZ5QcNBNhN1hMZ1Yppuxffva",
-          expirationTime: null,
-          keys: {
-              p256dh: "BEUgSgUYhra6G-P2xpVggMbkIT-UG2bzJg5kF4QTH0SOODxLAEpAPlEdRgbJEEUGYJtSy_ZpDvio-TJePecYIBM",
-              auth: "s-yjnDfiMk42BBOWrxGGZg"
-          }
-        };
-        webpush.sendNotification(pushSubscription, '왜 안돼 개자석');
-    } catch (err) {
-      console.log(`err`, err);
-    }
-}
-
-appPush();
 
 /* 미들웨어 */
 app.use(cors());
@@ -86,10 +55,6 @@ app.use('/api/user', userRouter);
 app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
 app.use('/api/push', pushRouter);
-<<<<<<< HEAD
-
-=======
->>>>>>> jb
 
 app.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
