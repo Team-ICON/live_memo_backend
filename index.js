@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import Ydoc from "./src/model/memo";
 import cors from "cors";
 import passport from 'passport';
+import webpush from "web-push";
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -11,6 +12,7 @@ const cookieParser = require("cookie-parser");
 import memoRouter from "./src/Router/memoRouter";
 import userRouter from "./src/Router/userRouter";
 import folderRouter from "./src/Router/folderRouter";
+import pushRouter from "./src/Router/pushRouter";
 
 dotenv.config();
 import "./src/db";
@@ -19,7 +21,6 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const session = require('express-session');	//세션관리용 미들웨어
 const server = require("http").createServer(app);
-
 
 app.use(session({
   httpOnly: true,	//자바스크립트를 통해 세션 쿠키를 사용할 수 없도록 함
@@ -33,13 +34,32 @@ app.use(session({
   }
 }));
 
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+const appPush = async () => {
+    try {
+        // VAPID keys should be generated only once.
+        const vapidKeys = webpush.generateVAPIDKeys();
+        webpush.setGCMAPIKey('BEQA-GyE9tre2RN7z0CWpDpTU3q0sf-7xXZthInZhHfyNO0tg_tJEYy2mZMpPXTBl2749U7lZS9z36fhwA0UEmA');
+        webpush.setVapidDetails(
+            'mailto:example@yourdomain.org',
+            vapidKeys.publicKey,
+            vapidKeys.privateKey
+        );
+        // This is the same output of calling JSON.stringify on a PushSubscription
+        const pushSubscription = {
+          endpoint: "https://fcm.googleapis.com/fcm/send/ecGDRJwosX8:APA91bER7PvGoOMe_aPvW-YimO9JtdzhJYNoNzcQqHtnBL4ZO7MwZ0CRh7T0Vapi_KICV2SwxCSHK-oXSc07iJsz-4uCdpcYnCO0bsy4wJw-kPA9yGCfoZ5QcNBNhN1hMZ1Yppuxffva",
+          expirationTime: null,
+          keys: {
+              p256dh: "BEUgSgUYhra6G-P2xpVggMbkIT-UG2bzJg5kF4QTH0SOODxLAEpAPlEdRgbJEEUGYJtSy_ZpDvio-TJePecYIBM",
+              auth: "s-yjnDfiMk42BBOWrxGGZg"
+          }
+        };
+        webpush.sendNotification(pushSubscription, '왜 안돼 개자석');
+    } catch (err) {
+      console.log(`err`, err);
+    }
+}
 
+appPush();
 
 /* 미들웨어 */
 app.use(cors());
@@ -61,23 +81,7 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRouter);
 app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
-
-//음성 webrtc
-io.on("connection", (socket) => {
-  socket.emit("me", socket.id);
-
-  socket.on("disconnect", () => {
-    socket.broadcast.emit("callEnded")
-  });
-
-  socket.on("callUser", ({ userToCall, signalData, from, name }) => {
-    io.to(userToCall).emit("callUser", { signal: signalData, from, name });
-  });
-
-  socket.on("answerCall", (data) => {
-    io.to(data.to).emit("callAccepted", data.signal)
-  });
-});
+app.use('/api/push', pushRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
