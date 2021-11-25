@@ -477,16 +477,17 @@ export const addUser = async (req, res) => {
                 console.log(err);
                 return res.status(400).json({ "message": "no such memo" })
             }
+            
             let userList = memo?.userList;
 
 
             if (userList) {
                 userList.push(userId);
-
             }
             else {
-                userList = [_userId._id];
-                userList.push(userId);
+                console.log("딱 걸렸다 이새끼야");
+                // userList = [_userId._id];
+                // userList.push(userId);
             }
 
             // db에 업데이트 해주기

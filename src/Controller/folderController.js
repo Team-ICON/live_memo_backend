@@ -54,11 +54,11 @@ export const createFolder = (req, res) => { //폴더 생성
 
 export const deleteFolder = (req, res) => { //메모 삭제
     // 1. 리퀘스트로부터 유저ID, 삭제할 폴더명, 받아오기
-    // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
-    // const { FolderName } = req.body; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
+    const userId = req.user._id; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
+    const FolderName = req.body.folderName; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const userId = "SeoL";
-    const folderName = "seoFolder";
+    // const userId = "SeoL";
+    // const folderName = "seoFolder";
 
     // if (folderName === "BOOKMARK" || folderName ==="DEFAULT") {
     //     console.log(err)
@@ -66,7 +66,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
     // }
 
     // 2. 해당 유저 데이터로부터 folderList, memolist 받아오기
-    User.findOne({ ID: userId }, async (err, user) => {
+    User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such ID" })
@@ -75,18 +75,18 @@ export const deleteFolder = (req, res) => { //메모 삭제
         let memoList = user.memoList;
 
         // 삭제하려는 폴더명이 폴더리스트에 있는지 확인
-        if (!folderList.has(folderName)) {
+        if (!folderList.has(FolderName)) {
             console.log("cannot find folder");
             return res.status(400).json({ "message": "cannot find folder" });
         }
 
         // 해당 폴더명의 메모 리스트 받아오기
-        let targetMemoList = folderList.get(folderName);
+        let targetMemoList = folderList.get(FolderName);
         // console.log(targetMemoList);
         // 메모리스트 순회하면서 deleteMemo() 실행
         targetMemoList.forEach(target => {
             memoList.delete(target);
-            Memo.findOne({ ID: target }, async (err, memo) => {
+            Memo.findOne({ _id: target }, async (err, memo) => {
 
                 // 1) 해당 메모에서 유저리스트 가져와서, 해당 리스트 내 해당 유저 지우기
                 let userList = memo.userList;
@@ -103,16 +103,16 @@ export const deleteFolder = (req, res) => { //메모 삭제
                     })
                 }
                 // 3) 변경사항  DB에 저장
-                await Memo.findOneAndUpdate({ ID: target }, { userList: userList });
+                await Memo.findOneAndUpdate({ _id: target }, { userList: userList });
 
             })
         })
 
         // folderList에서 해당 folder 삭제
-        folderList.delete(folderName);
+        folderList.delete(FolderName);
 
         // db에 업데이트 
-        await User.findOneAndUpdate({ ID: userId }, { folderList: folderList, memoList: memoList });
+        await User.findOneAndUpdate({ _id: userId }, { folderList: folderList, memoList: memoList });
         return res.status(200).json({ "message": "deleted successfully" });
     });
 }
