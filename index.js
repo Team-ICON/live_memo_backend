@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import Ydoc from "./src/model/memo";
 import cors from "cors";
 import passport from 'passport';
+import webpush from "web-push";
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -13,7 +14,6 @@ import userRouter from "./src/Router/userRouter";
 import folderRouter from "./src/Router/folderRouter";
 import pushRouter from "./src/Router/pushRouter";
 
-
 dotenv.config();
 import "./src/db";
 
@@ -21,7 +21,6 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const session = require('express-session');	//세션관리용 미들웨어
 const server = require("http").createServer(app);
-
 
 app.use(session({
   httpOnly: true,	//자바스크립트를 통해 세션 쿠키를 사용할 수 없도록 함
@@ -34,14 +33,6 @@ app.use(session({
     Secure: true
   }
 }));
-
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
-
 
 /* 미들웨어 */
 app.use(cors());
@@ -65,7 +56,8 @@ app.use('/api/memo', memoRouter);
 app.use('/api/folder', folderRouter);
 app.use('/api/push', pushRouter);
 
-
 app.listen(process.env.PORT, () => {
   console.log(`✅ Listening on at http://localhost:${process.env.PORT}`);
 })
+
+// don't delete this comment, - heroku addons:open papertrail
