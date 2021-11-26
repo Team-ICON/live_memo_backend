@@ -29,10 +29,17 @@ export const createMemo = (req, res) => {
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
             let curMem = roomsStatus[memoInfo._id]
-            if (curMem === undefined && req.body.first)
+            if (curMem === undefined && req.body.first) {
                 roomsStatus[memoInfo._id] = [req.user]
-            else
+                // roomsStatus[memoInfo._id] = new Set()
+                // roomsStatus[memoInfo._id].add(req.user)
+            }
+
+            else {
                 roomsStatus[memoInfo._id].pop(req.user)
+            }
+
+
         }
 
         console.log("current Room status memocontroller 41", roomsStatus)
@@ -236,14 +243,17 @@ export const viewMemo = (req, res) => {
             console.log("no such memo!");
             return res.status(400).json({ "message": "no such memo!" });
         }
-        // 해당 메모의 userList는 userId의 리스트이므로 각 유저마다 프로필, 이름사진을 찾아온다
 
         let curMem = roomsStatus[memo._id]
-        if (curMem === undefined)
+        if (curMem === undefined) {
             roomsStatus[memo._id] = [req.user]
+            // roomsStatus[memo._id] = new Set();
+            // roomsStatus[memo._id].add(req.user)
+        }
         else {
-            console.log(roomsStatus)
-            roomsStatus[memo._id].push(req.user)
+            if ((JSON.stringify(roomsStatus[memo._id])).includes(JSON.stringify(req.user)) === false)
+                roomsStatus[memo._id].push(req.user)
+
         }
 
 
@@ -551,7 +561,7 @@ export const addUser = async (req, res) => {
                 console.log(err);
                 return res.status(400).json({ "message": "no such memo" })
             }
-            
+
             let userList = memo?.userList;
 
 
