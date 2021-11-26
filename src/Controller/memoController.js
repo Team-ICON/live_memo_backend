@@ -4,17 +4,10 @@ import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
-// import { moveFolderUtil } from "../utils";
-
 let roomsStatus = {}
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
-
-    // test용 
-    // const _id = "6197a5dfb2cdee4640e169cc"; //user
-    // const memoId = "final";
-    // const memoContent ="final"
 
     Memo.findOneAndUpdate({ _id: req.body._id, }, { title: req.body.title, content: req.body.body, updateTime: Date.now() }, { new: true, upsert: true }, async (err, memoInfo) => {
 
@@ -314,7 +307,6 @@ export const deleteMemo = (req, res) => {
     // userid, memoid 가져오기
     const { _id } = req.user; // request로부터 유저 id, 메모 id 받아옴(원래는 구글 토큰에서 추출)
     const { memoId } = req.body;
-    // test용 유저 그냥 해봄
     ////////////////////////////////////////////////////////////////////////
     // 유저 데이터
     // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거
@@ -378,7 +370,7 @@ export const addBookmark = async (req, res) => {
     const memoId = req.body.memoId
     const afterFolderName = "BOOKMARK";
 
-    // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
+    // 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
             console.log(err);
@@ -400,13 +392,13 @@ export const addBookmark = async (req, res) => {
             return res.status(400).json({ "message": "already exist in BOOKMARK!" })
         }
 
-        // 3. memoList에서 해당 메모ID 의 폴더명 변경
+        // memoList에서 해당 메모ID 의 폴더명 변경
         memoList.set(memoId, afterFolderName);
 
-        // 4-1. folderList의 기존 폴더 리스트에서 해당 메모ID 지우기
+        // 1. folderList의 기존 폴더 리스트에서 해당 메모ID 지우기
         const beforeFolderList = folderList.get(beforeFolderName).filter(item => item !== memoId);
 
-        // 4-2. folderList의 이동할 폴더 리스트에서 해당 메모ID 추가
+        // 2. folderList의 이동할 폴더 리스트에서 해당 메모ID 추가
         const afterFolderList = folderList.get(afterFolderName)
         afterFolderList.push(memoId);
 
@@ -452,13 +444,13 @@ export const removeBookmark = (req, res) => {
             return res.status(400).json({ "message": "already exist in DEFAULT!" })
         }
 
-        // 3. memoList에서 해당 메모ID 의 폴더명 변경
+        // memoList에서 해당 메모ID 의 폴더명 변경
         memoList.set(memoId, afterFolderName);
 
-        // 4-1. folderList의 기존 폴더 리스트에서 해당 메모ID 지우기
+        // 1. folderList의 기존 폴더 리스트에서 해당 메모ID 지우기
         const beforeFolderList = folderList.get(beforeFolderName).filter(item => item !== memoId);
 
-        // 4-2. folderList의 이동할 폴더 리스트에서 해당 메모ID 추가
+        // 2. folderList의 이동할 폴더 리스트에서 해당 메모ID 추가
         const afterFolderList = folderList.get(afterFolderName)
         afterFolderList.push(memoId);
 
@@ -471,35 +463,6 @@ export const removeBookmark = (req, res) => {
     });
 
 };
-// export const afterCurUser = async (req, res) => {
-//     const roomId = req.body.roomId;
-
-//     return res.status(200).json({ success: true, "message": "add user successfully", "userdata": roomsStatus[roomId] });
-
-
-// }
-// export const getCurUser = async (req, res) => {
-//     const userEmail = req.body.userEmail;
-//     User.findOne({ email: userEmail }, async (err, user) => {
-//         if (err) {
-//             console.log(err);
-//             return res.status(400).json({ "message": "cannot find this email" })
-//         }
-
-//         if (!user) {
-//             console.log("no such user!");
-//             return res.status(400).json({ "message": "cannot find this email" });
-//         }
-//         // 추가할 유저의 id, 폴더리스트, 메모리스트 받아오기
-//         const email = user.email || ""
-//         const profileName = user.profileName || "";
-//         const picture = user.picture || "";
-
-
-//         return res.status(200).json({ success: true, "message": "add user successfully", "userdata": { "email": email, "profileName": profileName, "picture": picture } });
-
-//     });
-// }
 
 export const addUser = async (req, res) => {
     const userEmail = req.body.userEmail;
@@ -559,9 +522,7 @@ export const addUser = async (req, res) => {
                 userList.push(userId);
             }
             else {
-                console.log("딱 걸렸다 이새끼야");
-                // userList = [_userId._id];
-                // userList.push(userId);
+                console.log("딱 걸렸다");
             }
 
             // db에 업데이트 해주기
