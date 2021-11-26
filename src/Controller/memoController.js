@@ -47,6 +47,11 @@ export const createMemo = (req, res) => {
             User.findOne({ _id: _id }, async (err, user) => {
                 if (err) {
                     console.log(err);
+                    return res.status(400).json({ "message": "error" })
+                }
+
+                if (!user) {
+                    console.log("no such id");
                     return res.status(400).json({ "message": "no such id" })
                 }
 
@@ -501,10 +506,6 @@ export const addUser = async (req, res) => {
     const memoId = req.body.memoId;
     // 메모를 만든 유저 아이디
     const _userId = req.user;
-
-    //test용
-    // const userEmail = "test@test.com";
-    // const memoId = "6198a082fbb0a29d0154b5f5";
 
     // User
     // 추가할 사용자를 이메일 주소로 검색한다

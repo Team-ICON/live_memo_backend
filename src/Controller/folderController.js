@@ -5,7 +5,7 @@ import User from "../model/user";
 export const showFolder = (req, res) => { //폴더 조회
     const user = req.user;
 
-    User.findOne({ ID: user.ID }, (err, user) => {
+    User.findOne({ _id: user.ID }, (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at showFolder" });
@@ -25,12 +25,12 @@ export const createFolder = (req, res) => { //폴더 생성
     // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // const { folderName } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     // test용 유저 그냥 해봄
-    const user = req.user;
+    const userId = req.user._id
     const folderName = req.body.folderName;
 
     // 2. 해당 유저 데이터에서 folderListy-(map) 받아오고 수정
 
-    User.findOne({ ID: user.ID }, async (err, user) => {
+    User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such id" })
@@ -47,7 +47,7 @@ export const createFolder = (req, res) => { //폴더 생성
         // console.log(folderList);
 
         // 3. DB에 {folderList: folderList} 반영하기
-        await User.findOneAndUpdate({ ID: user.ID }, { folderList: folderList });
+        await User.findOneAndUpdate({ _id: userId }, { folderList: folderList });
         return res.status(200).json({ success: true, folders: folderList });
     });
 }
@@ -56,14 +56,6 @@ export const deleteFolder = (req, res) => { //메모 삭제
     // 1. 리퀘스트로부터 유저ID, 삭제할 폴더명, 받아오기
     const userId = req.user._id; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     const FolderName = req.body.folderName; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
-    // test용 유저 그냥 해봄
-    // const userId = "SeoL";
-    // const folderName = "seoFolder";
-
-    // if (folderName === "BOOKMARK" || folderName ==="DEFAULT") {
-    //     console.log(err)
-    //     return res.status(400).json({"message": "cannot delete this folder"});
-    // }
 
     // 2. 해당 유저 데이터로부터 folderList, memolist 받아오기
     User.findOne({ _id: userId }, async (err, user) => {
@@ -82,7 +74,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
 
         // 해당 폴더명의 메모 리스트 받아오기
         let targetMemoList = folderList.get(FolderName);
-        // console.log(targetMemoList);
+
         // 메모리스트 순회하면서 deleteMemo() 실행
         targetMemoList.forEach(target => {
             memoList.delete(target);
@@ -95,7 +87,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
 
                 // 2) 유저리스트 길이가 0이 되면 실제 DB에서 메모 데이터 삭제
                 if ((userList || []).length === 0) {
-                    Memo.deleteOne({ ID: target }, (err, res) => {
+                    Memo.deleteOne({ _id: target }, (err, res) => {
                         if (err) {
                             console.log(err);
                             return res.status(400).json({ "message": "delete failed" })
@@ -119,17 +111,12 @@ export const deleteFolder = (req, res) => { //메모 삭제
 
 export const moveFolder = (req, res) => { //메모 이동
     // 1. 리퀘스트로부터 유저ID, 메모ID, 기존 폴더명, 이동할 폴더명 받아오기
-    // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
-    // const { userid } = req.body; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
-    // const { memoId } = req.body; // request로부터 memo id 받아옴(원래는 구글 토큰에서 추출)
-    // const { afterFolderName } = req.body; // request로부터 afterFolderName 받아옴(원래는 구글 토큰에서 추출)
-    // test용 유저 그냥 해봄
-    const userId = "SeoL";
-    const memoId = "9c2f0bba-6dad-4023-92b7-e702634fe0fa";
+    const userId = req.user._id
+    const memoId = req.body.memoId
     const afterFolderName = "seoFolder";
 
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
-    User.findOne({ ID: userId }, async (err, user) => {
+    User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "no such id" })
@@ -163,7 +150,7 @@ export const moveFolder = (req, res) => { //메모 이동
         // DB에 {memoList: memoList, folderList: folderList} 반영
         folderList.set(beforeFolderName, beforeFolderList);
         folderList.set(afterFolderName, afterFolderList);
-        await User.findOneAndUpdate({ ID: userId }, { memoList: memoList, folderList: folderList });
+        await User.findOneAndUpdate({ _id: userId }, { memoList: memoList, folderList: folderList });
         return res.status(200).json({ "message": "moved successfully" });
     });
 }
@@ -181,20 +168,8 @@ export const showMemosInFolder = (req, res) => { //메모 조회
         }
 
         try {
-            // let memoList = user.memoList;
-            // // console.log("memoList memoController 88", memoList)
-            // // let memoIds = memoList.keys();
-            // // console.log(`typeof(memoIds)`, typeof(memoIds));
-
             let bookmarkList = user.folderList.get("BOOKMARK");   // 정렬할때 북마크 여부 판단
             let arrangedList = user.folderList.get(targetFolder); // 타겟 폴더 내 메모들
-
-            // memoList.forEach((value, key) => {
-            //     if (!arrangedList.includes(key)) {
-            //         arrangedList.push(key)
-            //     }
-            // });
-            // arrangedList.push(...bookmarkList);
 
             Memo.find().where('_id').in(arrangedList).exec((err, records) => {
                 if (err) {
