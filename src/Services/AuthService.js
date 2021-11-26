@@ -47,20 +47,12 @@ export const signToken = async (req, res) => {
         } else {
             try {
                 console.log('token json send');
-                // res.cookie('livememo-token', token);
                 // res.redirect(`https://live-memo-610d4.firebaseapp.com/`);
                 res.redirect(`http://localhost:3000/token/${token}`);
-                // return res.status(200).json({ token });
-                // req.session.livememo = token;
-                // res.cookie('livememo-token', token);
-                // console.log(`redirect gogo`);
-                // res.redirect(`http://localhost:3000/`);
             } catch (err) {
                 console.log(`err`, err)
             }
-            // return res.status(200).json({token});
         }
-        // res.redirect(`http://localhost:3000/${token}`);
     });
 }
 
