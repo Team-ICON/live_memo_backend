@@ -167,3 +167,72 @@ export const moveFolder = (req, res) => { //메모 이동
         return res.status(200).json({ "message": "moved successfully" });
     });
 }
+
+
+// 폴더 안에 메모들 보여주기
+export const showMemosInFolder = (req, res) => { //메모 조회
+    const user = req.user;
+    const targetFolder = req.body.folderName;
+
+    User.findOne({ _id: user._id }).exec((err, user) => {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({ "message": "err at showMemo" })
+        }
+
+        try {
+            // let memoList = user.memoList;
+            // // console.log("memoList memoController 88", memoList)
+            // // let memoIds = memoList.keys();
+            // // console.log(`typeof(memoIds)`, typeof(memoIds));
+
+            let bookmarkList = user.folderList.get("BOOKMARK");   // 정렬할때 북마크 여부 판단
+            let arrangedList = user.folderList.get(targetFolder); // 타겟 폴더 내 메모들
+
+            // memoList.forEach((value, key) => {
+            //     if (!arrangedList.includes(key)) {
+            //         arrangedList.push(key)
+            //     }
+            // });
+            // arrangedList.push(...bookmarkList);
+
+            Memo.find().where('_id').in(arrangedList).exec((err, records) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(400).json({ "message": "err at showMemo" })
+                }
+                if (records) {
+                    let result = [];
+                    records.forEach((element) => {
+                        let temp = new Object();
+                        temp._id = element._id;
+                        temp.title = element.title;
+                        temp.content = element.content;
+                        temp.updateTime = element.updateTime;
+                        temp.howManyShare = element.userList.length;
+
+                        if (bookmarkList.includes(element._id)) {
+
+                            temp.bookmarked = true;
+                        } else {
+                            temp.bookmarked = false;
+                        }
+                        result.push(temp);
+                    });
+
+                    result.sort((a, b) => {
+                        if (a.bookmarked === b.bookmarked) {
+                            return a.updateTime > b.updateTime ? -1 : 1;
+                        }
+                        return a.bookmarked > b.bookmarked ? -1 : 1;
+                    })
+
+
+                    return res.status(200).json({ success: true, memos: result });
+                }
+            })
+        } catch (err) {
+            return res.status(400).json({ "message": "작성 된 메모가 없습니다.", result: "작성된 메모가 없습니다." });
+        }
+    })
+}
