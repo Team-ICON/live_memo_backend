@@ -5,15 +5,14 @@ import User from "../model/user";
 export const showFolder = (req, res) => { //폴더 조회
     const user = req.user;
 
-    User.findOne({ _id: user.ID }, (err, user) => {
+    User.findOne({ _id: user._id }, (err, user) => {
         if (err) {
             console.log(err);
             return res.status(400).json({ "message": "err at showFolder" });
         }
 
         const folderList = user.folderList;
-        const folders = Array.from(folderList.keys());
-
+        const folders = Array.from(folderList.keys()).filter(item => item !== "DEFAULT");
 
         return res.status(200).json({ success: true, folders: folders });
     })
@@ -110,7 +109,7 @@ export const deleteFolder = (req, res) => { //메모 삭제
 
         // db에 업데이트 
         await User.findOneAndUpdate({ _id: userId }, { folderList: folderList, memoList: memoList });
-        return res.status(200).json({ "message": "deleted successfully" });
+        return res.status(200).json({ success: true, "message": "deleted successfully" });
     });
 }
 
