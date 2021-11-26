@@ -65,8 +65,8 @@ io.on('connection', function (socket) {
   console.log('a user connected');
 
 
-  socket.on('newUser', ((msg) => {
-    socket.broadcast.emit('newUser', msg)
+  socket.on('newUser', ((email) => {
+    socket.broadcast.emit('newUser', email)
   }))
 
 });
