@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema({
     memoList: {
         type: Map,
         default: {},
+    },
+    fcmToken : {
+        type : String,
     }
 })
 

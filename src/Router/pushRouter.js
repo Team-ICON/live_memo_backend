@@ -7,13 +7,11 @@ import {
 } from "../Controller/pushController";
 
 import { isLoggedin } from "../Services/AuthService";
+import { fcmTokenList } from "../Controller/pushController";
 
 const router = express.Router();
 
-router.post("/createPush", isLoggedin, createPush);
-router.post("/test", isLoggedin, testPush);
-
-// router.put("/savePush", isLoggedin, savePush);
+router.post("/fcmTokenList", isLoggedin, fcmTokenList);
 
 
 
