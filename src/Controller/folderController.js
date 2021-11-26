@@ -57,6 +57,11 @@ export const deleteFolder = (req, res) => { //메모 삭제
     const userId = req.user._id; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
     const FolderName = req.body.folderName; // request로부터 폴더명 받아옴(원래는 구글 토큰에서 추출)
 
+    if (FolderName === "BOOKMARK" || FolderName ==="DEFAULT") {
+        console.log(err)
+        return res.status(400).json({"message": "cannot delete this folder"});
+    }
+
     // 2. 해당 유저 데이터로부터 folderList, memolist 받아오기
     User.findOne({ _id: userId }, async (err, user) => {
         if (err) {
