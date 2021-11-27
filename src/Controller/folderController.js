@@ -12,7 +12,7 @@ export const showFolder = (req, res) => { //폴더 조회
         }
 
         const folderList = user.folderList;
-        const folders = Array.from(folderList.keys()).filter(item => item !== "DEFAULT");
+        const folders = Array.from(folderList.keys());
 
         return res.status(200).json({ success: true, folders: folders });
     })
@@ -117,7 +117,8 @@ export const moveFolder = (req, res) => { //메모 이동
     // 1. 리퀘스트로부터 유저ID, 메모ID, 기존 폴더명, 이동할 폴더명 받아오기
     const userId = req.user._id
     const memoId = req.body.memoId
-    const afterFolderName = "seoFolder";
+    const afterFolderName = req.body.afterFolder;
+    console.log(afterFolderName);
 
     // 2. 해당 유저 데이터로부터 memoList, folderList 받아오기
     User.findOne({ _id: userId }, async (err, user) => {
