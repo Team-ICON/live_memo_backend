@@ -4,6 +4,7 @@
     "@babel/node": "^7.16.0",
     "@babel/preset-env": "^7.16.0",
     "body-parser": "^1.19.0",
+    "bson": "^4.6.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",

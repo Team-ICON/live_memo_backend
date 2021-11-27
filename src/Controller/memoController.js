@@ -3,12 +3,14 @@ import Memo from "../model/memo";
 import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
+const BSON = require('bson');
+
+
 
 let roomsStatus = {}
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
     const { _id } = req.user; // request로부터 유저 id 받아옴(원래는 구글 토큰에서 추출)
-
     Memo.findOneAndUpdate({ _id: req.body._id, }, { title: req.body.title, content: req.body.body, updateTime: Date.now() }, { new: true, upsert: true }, async (err, memoInfo) => {
 
         if (err) {

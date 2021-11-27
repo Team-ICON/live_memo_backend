@@ -47,7 +47,7 @@ export const signToken = async (req, res) => {
         } else {
             try {
                 console.log('token json send');
-                // res.redirect(`https://live-memo-610d4.firebaseapp.com/`);
+                // res.redirect(`https://live-memo-610d4.firebaseapp.com/token/${token}`);
                 res.redirect(`http://localhost:3000/token/${token}`);
             } catch (err) {
                 console.log(`err`, err)
