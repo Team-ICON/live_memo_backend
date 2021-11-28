@@ -3,7 +3,6 @@ import Memo from "../model/memo";
 import User from "../model/user";
 import mongoose from "mongoose";
 import { v4 } from 'uuid';
-const BSON = require('bson');
 
 
 
@@ -23,6 +22,8 @@ export const createMemo = (req, res) => {
 
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
+
+
             let curMem = roomsStatus[memoInfo._id]
             if (curMem === undefined && req.body.first) {
                 roomsStatus[memoInfo._id] = [req.user]
@@ -31,7 +32,9 @@ export const createMemo = (req, res) => {
             }
 
             else {
-                roomsStatus[memoInfo._id].pop(req.user)
+
+                roomsStatus[memoInfo._id] = roomsStatus[memoInfo._id].filter(x => x.email !== req.user.email)
+
             }
 
 
@@ -323,7 +326,7 @@ export const deleteMemo = (req, res) => {
     // 유저 데이터
     // 해당 user 데이터의 memolist에서 지우려는 memoid를 제거
 
-    roomsStatus[memoId].pop(_id)
+    roomsStatus[memoId] = roomsStatus[memoId].filter(x => x.email !== req.user.email)
     if (roomsStatus[memoId].length === 0)
         delete roomsStatus[memoId]
 
