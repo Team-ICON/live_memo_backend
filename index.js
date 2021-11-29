@@ -69,6 +69,11 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('newUser', email)
   }))
 
+  socket.on('reload', ((flag) => {
+    console.log(flag)
+    socket.broadcast.emit('reload', flag)
+  }))
+
 });
 
 
