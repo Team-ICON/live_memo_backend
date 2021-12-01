@@ -1,87 +1,76 @@
-# Project Title
 
-One Paragraph of project description goes here
+## 프로젝트에 대한 설명
 
-## Getting Started
+유저간 실시간 공유 메모 입니다.
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+유저 간 실시간 메모를 작성하며 음성으로도 커뮤니케이션을 할 수 있도록 구현하였습니다.
 
-### Prerequisites
+#### 폴더
 
-What things you need to install the software and how to install them
+유저 간 같은 메모를 공유하고 있더라도, 각 유저는 유저별 개인이 설정한 폴더에 해당 메모를 저장할 수 있습니다.
 
-```
-Give examples
-```
+#### 음성통화
 
-### Installing
+메모 화면에서 우측 상단의 마이크를 누르면 해당 메모에 접속 중인 유저와 음성통화가 가능합니다.
 
-A step by step series of examples that tell you how to get a development env running
+#### bookmark
 
-Say what the step will be
+메모 화면에서 메모는 가장 최근에 수정된 순으로 정렬되지만 메모를 북마크 등록하면 해당 메모는 최 상단에 고정됩니다.
 
-```
-Give the example
-```
+#### 유저초대
 
-And repeat
+gmail로 다른 유저와 메모를 공유할 수 있습니다.
 
-```
-until finished
-```
+- backend 링크
 
-End with an example of getting some data out of the system or using it for a little demo
+- frontend 링크
 
-## Running the tests
+- Key word
 
-Explain how to run the automated tests for this system
+Webrtc, WebSocket, CRDT, React, Node js, PWA
 
-### Break down into end to end tests
+- 사용기술, 사용한 라이브러리 및 그에 대한 설명
 
-Explain what these tests test and why
+Signaling Server 에서 Client 간 통신이 가능하도록 하였음 (signaling server에서는 어떤 데이터들이 오가는지)
 
-```
-Give an example
-```
+Client간 어떤 프로토콜로 통신하게 하는지. sctp?udp?
 
-### And coding style tests
+PWA + Service Worker를 통해 온/오프라인 상태에서 app push 가능토록 구현
 
-Explain what these tests test and why
+- 개선 여지가 있는 부분
 
-```
-Give an example
-```
+----------------------------------------------------------------------------------------------------------------------------------------------------
 
-## Deployment
+# 기술 problem & solving (계속 추가)
 
-Add additional notes about how to deploy this on a live system
+## 실시간 데이터 동시성 처리: CRDT vs OT
 
-## Built With
+- OT(Operational Transformation): 중앙 서버에서 변경사항 처리하여 모두 같은 데이터 볼 수 있도록 함
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+- CRDT(Conflict-Free-Replicated Data Types): 동시성 충돌을 막기 위한 새로운 자료 구조 도입, 최신 스타일
 
-## Contributing
+- OT는 구현이 복잡하며, 중앙 서버의 역할이 큼(google docs 등) --> 최신 기술이고, 상대적으로 단순한 로직을 가진 CRDT를 적용한 라이브러리 활용
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+## 클라이언트 연결 방식: webRTC vs websocket
 
-## Versioning
+- websocket: 클라이언트가 서버와 웹소켓 방식으로 연결, 안정적, 중앙 서버역할 중요, 비교적 느림
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+- webRTC: 클라이언트끼리 p2p 연결 --> 빠름, 비교적 불안정, 음성/영상 스트림 강점, 서버 부담 적음
 
-## Authors
+- 실시간성(공유 메모 타이핑 딜레이 최소화), 음성연결, 적은 서버 부담에 초점을 맞추어 webRTC 적용
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+## 공유 데이터 관리
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+- 공유자원을 관리하기 용이하도록 운영체제 파일시스템의 아이노드 링크 참조 개념을 활용하여 DB구조 설계
 
-## License
+- 공유자원 특성에 맞추어 개인별 관리 데이터(디렉토리 형식) 구현
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+## 라이브러리 수정
 
-## Acknowledgments
+- 우리의 현 서비스 상황에 맞춰 사용할 수 있도록 Yjs/y-webrtc 라이브러리 수정하여 사용
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+1) Room 생성시 유저ID로 관리
+
+2) 음성 stream을 추가하여 실시간 음성 대화 가능하게 함
+
+## 로그인, app push(+service worker), 배포(https) 추가 어떤지.. 
