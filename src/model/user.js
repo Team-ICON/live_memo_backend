@@ -35,6 +35,9 @@ const userSchema = new mongoose.Schema({
     },
     fcmToken : {
         type : String,
+    },
+    color : { 
+        type: String,
     }
 })
 
