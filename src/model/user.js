@@ -33,10 +33,10 @@ const userSchema = new mongoose.Schema({
         type: Map,
         default: {},
     },
-    fcmToken : {
-        type : String,
+    fcmToken: {
+        type: String,
     },
-    color : { 
+    color: {
         type: String,
     }
 })
