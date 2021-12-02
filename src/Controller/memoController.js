@@ -27,8 +27,7 @@ export const createMemo = (req, res) => {
             let curMem = roomsStatus[memoInfo._id]
             if (curMem === undefined && req.body.first) {
                 roomsStatus[memoInfo._id] = [req.user]
-                // roomsStatus[memoInfo._id] = new Set()
-                // roomsStatus[memoInfo._id].add(req.user)
+
             }
 
             else {
@@ -90,6 +89,21 @@ export const createMemo = (req, res) => {
     })
 
 }
+
+
+export const leaveRoom = (req, res) => {
+    const { memoId } = req.body;    // test용
+
+
+
+    roomsStatus[memoId] = roomsStatus[memoId].filter(x => x.email !== req.user.email)
+    if (roomsStatus[memoId].length === 0)
+        delete roomsStatus[memoId]
+
+    return res.status(200).json({ success: true, roomsStatus })
+
+}
+
 
 export const showMemos = (req, res) => { //메모 조회
     let user = req.user;
@@ -231,6 +245,7 @@ export const showMemosInFolder = (req, res) => { //메모 조회
 
 export const viewMemo = (req, res) => {
     const userId = req.user._id;
+
     Memo.findOne({ "_id": req.params.id }, (err, memo) => {
         if (err) {
             console.log(err);
@@ -249,8 +264,9 @@ export const viewMemo = (req, res) => {
             // roomsStatus[memo._id].add(req.user)
         }
         else {
-            if ((JSON.stringify(roomsStatus[memo._id])).includes(JSON.stringify(req.user)) === false)
+            if ((JSON.stringify(roomsStatus[memo._id])).includes(JSON.stringify(req.user)) === false) {
                 roomsStatus[memo._id].push(req.user)
+            }
 
         }
 

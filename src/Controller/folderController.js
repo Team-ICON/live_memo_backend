@@ -10,6 +10,11 @@ export const showFolder = (req, res) => { //폴더 조회
             console.log(err);
             return res.status(400).json({ "message": "err at showFolder" });
         }
+        if (!user) {
+            console.log("no such user");
+            return res.status(400).json({ "message": "no such user!" });
+
+        }
 
         const folderList = user.folderList;
         const folders = Array.from(folderList.keys());
