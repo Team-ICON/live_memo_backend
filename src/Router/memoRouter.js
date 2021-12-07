@@ -19,7 +19,7 @@ const router = express.Router();
 
 router.put("/createMemo", isLoggedin, createMemo);
 router.post("/delete", isLoggedin, deleteMemo);
-router.post("/save", isLoggedin, saveMemo);
+// router.post("/save", isLoggedin, saveMemo);
 router.post("/addbookmark", isLoggedin, addBookmark);
 router.post("/removebookmark", isLoggedin, removeBookmark);
 router.post("/addUser", isLoggedin, addUser);
@@ -30,15 +30,6 @@ router.get("/getMemos/:folder", isLoggedin, showMemos); // 특정 폴더 메모 
 router.get("/getMemo/:id", isLoggedin, viewMemo); // 하나의 메모 조회
 router.get("/getUserListOfMemo/:id", isLoggedin, getUserListOfMemo);
 
-// router.put("/createMemo", createMemo);
-
-// router.post("/addUser", addUser);
-// router.get("/getMemo/:id", viewMemo); // 하나의 메모 조회
-// router.get("/getMemos", showMemos); // main에 메모리스트 전체 뜨는 것
-// router.post("/addUser", addUser);
-// router.post("/delete", isLoggedin, deleteMemo);
-// router.post("/save", isLoggedin, saveMemo);
-// router.get("/show", isLoggedin, showMemo);
 
 
 export default router;

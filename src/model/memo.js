@@ -14,11 +14,3 @@ const model = mongoose.model('Memo', memoSchema);
 
 export default model;
 
-/*
-   bans: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Ban'}
-    ]
-
-    date: { type: Date , default: Date.now()},
-
-*/

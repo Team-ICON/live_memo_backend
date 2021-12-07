@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 import { v4 } from 'uuid';
 
 
-
 let roomsStatus = {}
 export const createMemo = (req, res) => {
     // 1.유저 아이디 받아오기(유저 데이터에 있는지랑 로그인 여부는 미들웨어에서 통과했다고 생각함)
@@ -22,7 +21,6 @@ export const createMemo = (req, res) => {
 
         //정말 저장 하고 나가는지 아니면 중간에 주기적으로 호출하는 콜백인지 구분
         if (IsQuit) {
-
 
             let curMem = roomsStatus[memoInfo._id]
             if (curMem === undefined && req.body.first) {
@@ -92,8 +90,7 @@ export const createMemo = (req, res) => {
 
 
 export const leaveRoom = (req, res) => {
-    const { memoId } = req.body;    // test용
-
+    const { memoId } = req.body;   
 
 
     roomsStatus[memoId] = roomsStatus[memoId].filter(x => x.email !== req.user.email)
@@ -108,7 +105,6 @@ export const leaveRoom = (req, res) => {
 export const showMemos = (req, res) => { //메모 조회
     let user = req.user;
 
-    // User.findOne({ ID: '618e50689f7b6b438695fc2c' }, (err, user) => {
     User.findOne({ _id: user._id }).exec((err, user) => {
         if (err) {
             console.log(err);
@@ -117,9 +113,6 @@ export const showMemos = (req, res) => { //메모 조회
 
         try {
             let memoList = user.memoList;
-            // console.log("memoList memoController 88", memoList)
-            // let memoIds = memoList.keys();
-            // console.log(`typeof(memoIds)`, typeof(memoIds));
 
             let bookmarkList = user.folderList.get("BOOKMARK");
 
@@ -186,20 +179,9 @@ export const showMemosInFolder = (req, res) => { //메모 조회
         }
 
         try {
-            // let memoList = user.memoList;
-            // // console.log("memoList memoController 88", memoList)
-            // // let memoIds = memoList.keys();
-            // // console.log(`typeof(memoIds)`, typeof(memoIds));
 
             let bookmarkList = user.folderList.get("BOOKMARK");   // 정렬할때 북마크 여부 판단
             let arrangedList = user.folderList.get(targetFolder); // 타겟 폴더 내 메모들
-
-            // memoList.forEach((value, key) => {
-            //     if (!arrangedList.includes(key)) {
-            //         arrangedList.push(key)
-            //     }
-            // });
-            // arrangedList.push(...bookmarkList);
 
             Memo.find().where('_id').in(arrangedList).exec((err, records) => {
                 if (err) {
@@ -260,8 +242,6 @@ export const viewMemo = (req, res) => {
         let curMem = roomsStatus[memo._id]
         if (curMem === undefined) {
             roomsStatus[memo._id] = [req.user]
-            // roomsStatus[memo._id] = new Set();
-            // roomsStatus[memo._id].add(req.user)
         }
         else {
             if ((JSON.stringify(roomsStatus[memo._id])).includes(JSON.stringify(req.user)) === false) {
@@ -315,23 +295,20 @@ export const viewMemo = (req, res) => {
 }
 
 
-//이거는 나중에 시그널링 되고 다시 봐야할듯
-export const saveMemo = (req, res) => {
-    // 1. memo id, content 받아오기
-    const { content } = req.body; // request로부터 content, 메모 id 받아옴(원래는 구글 토큰에서 추출)
-    const { memoId } = req.body;    // test용
-    // const memoId = "4bf120e5-28b3-426d-ae07-d759c4346379";
-    // const body = "please";
+// export const saveMemo = (req, res) => {
+//     // 1. memo id, content 받아오기
+//     const { content } = req.body; 
+//     const { memoId } = req.body;   
 
-    // 2. db에서 해당 메모 찾기
-    Memo.findOneAndUpdate({ _id: memoId }, { updateTime: Date.now(), body: body }, (err, modified) => {
-        if (err) {
-            console.log(err);
-            return res.status(400).json({ "message": "memo saved failed" });
-        }
-        return res.status(200).json({ "message": "memo saved successfully" });
-    });
-}
+//     // 2. db에서 해당 메모 찾기
+//     Memo.findOneAndUpdate({ _id: memoId }, { updateTime: Date.now(), body: body }, (err, modified) => {
+//         if (err) {
+//             console.log(err);
+//             return res.status(400).json({ "message": "memo saved failed" });
+//         }
+//         return res.status(200).json({ "message": "memo saved successfully" });
+//     });
+// }
 
 export const deleteMemo = (req, res) => {
 
