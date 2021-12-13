@@ -73,4 +73,6 @@ PWA + Service Worker를 통해 온/오프라인 상태에서 app push 가능토�
 
 2) 음성 stream을 추가하여 실시간 음성 대화 가능하게 함
 
-## 로그인, app push(+service worker), 배포(https) 추가 어떤지.. 
+## 로그인, app push(+service worker), 배포(https) 추가 어떤지..
+
+![livememo_최최종](https://user-images.githubusercontent.com/18034609/145803684-7e1c15fc-b437-413e-84ae-5958ef0631e0.png)
